@@ -19,10 +19,10 @@ namespace DataLayer.Repository.Product
 
         public async Task<bool> AddProduct(ProductMaster productMaster)
         {
-            productMaster.Created_By = "RAVINDRA";
-            productMaster.Created_Date= DateTime.Now;
-            productMaster.Updated_By = "RAVINDRA";
-            productMaster.Updated_Date = DateTime.Now;
+            //productMaster.Created_By = "RAVINDRA";
+            //productMaster.Created_Date= DateTime.Now;
+            //productMaster.Updated_By = "RAVINDRA";
+            //productMaster.Updated_Date = DateTime.Now;
             int res = await _connection.InsertAsync<ProductMaster>(productMaster);
             if(res>0)
             {

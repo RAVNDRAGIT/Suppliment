@@ -9,6 +9,10 @@ namespace DataLayer.Interface
     public interface IUnitOfWork : IDisposable
     {
         IProductMasterRepository ProductMasterRepository { get; }
+        IUserRepository UserRepository { get; }
+
+        IOrderMasterRepository OrderMasterRepository { get; }
+        IOrderDetailRepository OrderDetailRepository { get; }
         void Commit();
     }
 }

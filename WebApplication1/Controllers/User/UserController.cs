@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Interface;
+using ServiceLayer.Interface.IService;
 
 namespace Suppliment.API.Controllers.User
 {
@@ -28,6 +28,16 @@ namespace Suppliment.API.Controllers.User
             {
                 return Ok(result);
             }
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer",Roles ="Admin")]
+
+        [HttpGet]
+        public IActionResult GetUserName()
+        {
+            string username = _iauthService.GetUserName();
+            return Ok(username);
+
         }
     }
 }

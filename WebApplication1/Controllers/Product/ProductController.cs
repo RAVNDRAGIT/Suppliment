@@ -4,7 +4,7 @@ using DataContract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer;
-using ServiceLayer.Interface;
+using ServiceLayer.Interface.IService;
 using Suppliment.API.Model;
 
 namespace Suppliment.API.Controllers.Product

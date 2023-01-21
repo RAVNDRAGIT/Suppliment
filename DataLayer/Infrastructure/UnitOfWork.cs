@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DataLayer.Interface;
 using DataLayer.Context;
+using DataLayer.Repository.Auth;
 
 namespace DataLayer.Infrastructure
 {
@@ -20,15 +21,17 @@ namespace DataLayer.Infrastructure
         private IDbConnection _connection;
         private IDbTransaction _transaction;
         public IProductMasterRepository ProductMasterRepository { get; }
-        public IAuth IAuth { get; }
-
+        public IUserRepository UserRepository { get; }
+        public IOrderMasterRepository OrderMasterRepository { get; }
+        public IOrderDetailRepository OrderDetailRepository { get; }
+       
 
         //private DbContext _dbContext;
         //private string connStr => _dbContext.CreateConnection().ConnectionString;
 
         #region Configuration
 
-        public UnitOfWork(DbContext dbContext, IProductMasterRepository productMasterRepository,IAuth iAuth)
+        public UnitOfWork(DbContext dbContext, IProductMasterRepository productMasterRepository, IUserRepository userRepository, IOrderMasterRepository orderMasterRepository, IOrderDetailRepository orderDetailRepository)
         {
             //_configuration = configuration;
             _connection = new SqlConnection();
@@ -37,8 +40,9 @@ namespace DataLayer.Infrastructure
             _connection.Open();
             _transaction = _connection.BeginTransaction();
             ProductMasterRepository = productMasterRepository;
-            IAuth = iAuth;
-
+            UserRepository = userRepository;
+            OrderMasterRepository = orderMasterRepository;
+            OrderDetailRepository = orderDetailRepository;
         }
         public void Commit()
         {
