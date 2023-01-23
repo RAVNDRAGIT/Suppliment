@@ -32,6 +32,10 @@ namespace DataLayer.Repository.Product
             return false;
         }
 
-        
+        public async Task<ProductMaster> GetProduct(long id)
+        {
+            var data = await _connection.GetAsync<ProductMaster>(id);
+            return data;
+        }
     }
 }

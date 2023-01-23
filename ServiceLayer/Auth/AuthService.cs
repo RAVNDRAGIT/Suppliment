@@ -21,6 +21,7 @@ namespace ServiceLayer.Auth
         private readonly IUserRepository iUser;
         private IJwtMiddleware jwtMiddleware;
         public IUnitOfWork _unitOfWork;
+        public IAuthService _authService { get; set; }
         public AuthService(IUserRepository _iUser, IJwtMiddleware _jwtMiddleware, IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -53,11 +54,19 @@ namespace ServiceLayer.Auth
 
         }
 
-        public long GetUserId()
+        public long? GetUserId()
         {
             var jwtToken = jwtMiddleware.JwtToken();
-            var userid = int.Parse(jwtToken.Claims.First(x => x.Type == "UserId").Value);
-            return userid;
+            if (jwtToken != null)
+            {
+                var userid = int.Parse(jwtToken.Claims.First(x => x.Type == "UserId").Value);
+                return userid;
+            }
+            else
+            {
+                return null;
+            }
+
 
         }
     }

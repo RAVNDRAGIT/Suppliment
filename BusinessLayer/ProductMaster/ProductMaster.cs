@@ -14,6 +14,9 @@ namespace BusinessLayer.ProductMaster
         public double Price { get; set; } = 0;
         public int Quantity { get; set; } = 0;
         public double Discount { get; set; }=0;
+        public double DiscountPercentage { get; set; } = 0;
+        public string ImagePath { get; set; }
+        public long? CategoryId { get; set; }
     }
 }
 

@@ -9,6 +9,6 @@ namespace ServiceLayer.Interface.IService
 {
     public interface IOrderService
     {
-        Task<bool> SubmitOrder(List<OrderDetailDC> orderDetailDC,long userid);
+        Task<bool> SubmitOrder(List<OrderDetailDC> orderDetailDC,long? userid);
     }
 }

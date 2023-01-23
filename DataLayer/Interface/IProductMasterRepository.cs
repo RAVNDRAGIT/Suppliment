@@ -10,5 +10,6 @@ namespace DataLayer.Interface
     public interface IProductMasterRepository
     {
        Task<bool> AddProduct(ProductMaster productMaster);
+        Task<ProductMaster> GetProduct(long id);
     }
 }

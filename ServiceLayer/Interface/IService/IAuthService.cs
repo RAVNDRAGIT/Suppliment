@@ -11,7 +11,7 @@ namespace ServiceLayer.Interface.IService
     {
         string Token(UserCredentialDC userCredentialDC);
         string GetUserName();
-        long GetUserId();
+        long? GetUserId();
 
     }
 }

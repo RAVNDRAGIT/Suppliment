@@ -18,10 +18,10 @@ namespace ServiceLayer.Order
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<bool> SubmitOrder(List<OrderDetailDC> orderDetailDC, long userid)
+        public async Task<bool> SubmitOrder(List<OrderDetailDC> orderDetailDC, long? userid)
         {
             bool result = false;
-
+            long currentuserid = userid ?? 0;
             orderDetailDC.ForEach(x =>
             {
                 x.TotalMrp = x.Mrp * x.Quantity;
@@ -43,15 +43,15 @@ namespace ServiceLayer.Order
                 TotalPrice = TotalPrice
             };
 
-            long orderresult = await _unitOfWork.OrderMasterRepository.SaveOrder(orderMaster, userid);
+            long orderresult = await _unitOfWork.OrderMasterRepository.SaveOrder(orderMaster, currentuserid);
             if (orderresult > 0)
             {
                 List<OrderDetail> orderDetail = Mapper.Map(orderDetailDC).ToANew<List<OrderDetail>>();
                 orderDetail.ForEach(x =>
                 {
-                    x.Created_By = userid;
+                    x.Created_By = currentuserid;
                     x.Created_Date = DateTime.Now;
-                    x.Updated_By = userid;
+                    x.Updated_By = currentuserid;
                     x.Updated_Date = DateTime.Now;
                 });
 

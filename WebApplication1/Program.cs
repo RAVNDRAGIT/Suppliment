@@ -1,5 +1,6 @@
 //using DataLayer.Context;
 
+using DataContract;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -17,6 +18,7 @@ using ServiceLayer.File;
 using ServiceLayer.Helper;
 using ServiceLayer.Interface.IHelper;
 using ServiceLayer.Interface.IService;
+using ServiceLayer.Mongo;
 using ServiceLayer.Order;
 using ServiceLayer.Product;
 using System.Security.Cryptography.Xml;
@@ -36,7 +38,11 @@ builder.Services.AddScoped<IOrderMasterRepository, OrderMasterRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IFileService,FileService>();
+builder.Services.AddScoped<IWhatsApp, WhatsAppHelper>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
+builder.Services.Configure<MongoDbDC>(
+    builder.Configuration.GetSection("Order"));
+builder.Services.AddScoped<CartService>();
 builder.Services.AddControllers();
 var key = builder.Configuration.GetSection("Key").GetSection("userKey").Value;
 builder.Services.AddAuthentication(x =>
