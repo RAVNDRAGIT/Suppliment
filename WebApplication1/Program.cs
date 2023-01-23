@@ -44,6 +44,7 @@ builder.Services.Configure<MongoDbDC>(
     builder.Configuration.GetSection("Order"));
 builder.Services.AddScoped<CartService>();
 builder.Services.AddControllers();
+
 var key = builder.Configuration.GetSection("Key").GetSection("userKey").Value;
 builder.Services.AddAuthentication(x =>
 {
@@ -99,6 +100,14 @@ builder.Services.Configure<FormOptions>(o =>
     o.MultipartBodyLengthLimit = int.MaxValue;
     o.MemoryBufferThreshold = int.MaxValue;
 });
+// Shows UseCors with CorsPolicyBuilder.
+// Adding CORS Policy
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy",
+        builder => builder.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+});
 
 var app = builder.Build();
 
@@ -110,12 +119,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions()
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
     RequestPath = new PathString("/Resources")
 });
+
+// Shows UseCors with named policy.
+app.UseCors("MyPolicy");
 app.UseAuthorization();
 
 app.MapControllers();

@@ -30,7 +30,7 @@ namespace ServiceLayer.Auth
 
         }
 
-        public string Token(UserCredentialDC userCredentialDC)
+        public ValidUserDetailDC Token(UserCredentialDC userCredentialDC)
         {
             var user = Mapper.Map(userCredentialDC).ToANew<User>();
             var data = _unitOfWork.UserRepository.Authentication(user);
@@ -42,7 +42,9 @@ namespace ServiceLayer.Auth
             else
             {
                 var token = jwtMiddleware.GenerateToken(data);
-                return token;
+                ValidUserDetailDC validUserDetailDC = Mapper.Map(data).ToANew<ValidUserDetailDC>();
+                validUserDetailDC.Token = token;
+                return validUserDetailDC;
             }
         }
 

@@ -9,7 +9,7 @@ namespace ServiceLayer.Interface.IService
 {
     public interface IAuthService
     {
-        string Token(UserCredentialDC userCredentialDC);
+        ValidUserDetailDC Token(UserCredentialDC userCredentialDC);
         string GetUserName();
         long? GetUserId();
 

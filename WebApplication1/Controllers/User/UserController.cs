@@ -16,9 +16,9 @@ namespace Suppliment.API.Controllers.User
         _iauthService= iauthService;
         }
         [HttpPost]
-        public IActionResult Authentication(UserCredentialDC userCredentialDC)
+        public IActionResult Authentication(UserCredentialDC logincredentail)
         {
-            string result =  _iauthService.Token(userCredentialDC);
+            var result =  _iauthService.Token(logincredentail);
 
             if (result==null)
             {
@@ -26,7 +26,7 @@ namespace Suppliment.API.Controllers.User
             }
             else
             {
-                return Ok(result);
+                return Ok( result);
             }
         }
 

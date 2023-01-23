@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Helper
 {
-    public class JwtMiddleware:IJwtMiddleware
+    public class JwtMiddleware : IJwtMiddleware
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly DbContext _dbContext;
@@ -26,25 +26,32 @@ namespace ServiceLayer.Helper
         }
         public JwtSecurityToken JwtToken()
         {
-         
 
-            
-            var tokenHandler=new JwtSecurityTokenHandler();
+
+
+            var tokenHandler = new JwtSecurityTokenHandler();
             var secretkey = _dbContext.AuthKey();
-            var key= Encoding.ASCII.GetBytes(secretkey);
-            var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty) ;
+            var key = Encoding.ASCII.GetBytes(secretkey);
+            var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
 
-            tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            if (!string.IsNullOrEmpty(token))
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+                tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                return jwtToken;
+            }
+            else
+            {
+                return null;
+            }
 
-            var jwtToken = (JwtSecurityToken)validatedToken;
-            return jwtToken;
         }
 
         public string GenerateToken(ValidUserDetailDC validUserDetailDC)

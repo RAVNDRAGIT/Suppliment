@@ -9,6 +9,7 @@ namespace Suppliment.API.Controllers.Order
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class CartController : ControllerBase
     {
         public CartService _cartService { get; set; }
@@ -20,10 +21,11 @@ namespace Suppliment.API.Controllers.Order
         }
 
         [HttpPost]
+       
         public async Task<IActionResult> AddCart(CartDetailDC cartDetailDC)
         {
             string res = await _cartService.CreateAsync(cartDetailDC);
-            return Ok(res);
+            return Ok( res);
         }
 
         [HttpGet]
