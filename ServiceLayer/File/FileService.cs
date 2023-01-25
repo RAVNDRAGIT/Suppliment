@@ -2,8 +2,6 @@
 using DataLayer.Context;
 using Microsoft.AspNetCore.Http;
 using ServiceLayer.Helper;
-using ServiceLayer.Interface.IHelper;
-using ServiceLayer.Interface.IService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.File
 {
-    public class FileService : IFileService
+    public class FileService 
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
        

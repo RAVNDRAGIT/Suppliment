@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ServiceLayer.Auth;
-using ServiceLayer.Interface.IService;
+using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,45 +16,39 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace ServiceLayer.Mongo
+namespace ServiceLayer.Carts
 {
     public class CartService
     {
-        private readonly IMongoCollection<Cart> _cart;
+
         public IUnitOfWork _unitofWork;
-        public DbContext _dbContext;
+        public MongoHelper _mongoHelper;
         private long? userid;
-        public IAuthService _authService;
+        public JwtMiddleware _jwtMiddleware;
+        public IProductMasterRepository _productMasterRepository;
         public CartService(
-            IOptions<MongoDbDC> mongoDbDC, IUnitOfWork unitOfWork, DbContext dbContext, IAuthService authService)
+            IOptions<MongoDbDC> mongoDbDC, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware, IProductMasterRepository productMasterRepository, MongoHelper mongoHelper)
         {
-            _dbContext = dbContext;
-            var mongoClient = new MongoClient(
-               _dbContext.MongoConString());
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                _dbContext.MongoDbName());
-
-            _cart = mongoDatabase.GetCollection<Cart>(
-                _dbContext.MongoOrderCollection());
             _unitofWork = unitOfWork;
-            _authService = authService;
-            userid = _authService.GetUserId();
+            _mongoHelper = mongoHelper;
+            _jwtMiddleware = jwtMiddleware;
+            userid = _jwtMiddleware.GetUserId();
+            _productMasterRepository = productMasterRepository;
         }
 
         public async Task<List<Cart>> GetAsync() =>
-            await _cart.Find(_ => true).ToListAsync();
+             await _mongoHelper.OrderCollection().Find(_ => true).ToListAsync();
 
-        public async Task<Cart?> GetAsync( string cookievalue)
+        public async Task<Cart?> GetAsync(string cookievalue)
         {
             Cart existscart = new Cart();
             if (userid != null && userid.HasValue)
             {
-                existscart = await _cart.Find(x => x.Created_By == userid).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
             }
             else
             {
-                existscart = await _cart.Find(x => x.CookieValue == cookievalue).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == cookievalue).FirstOrDefaultAsync();
 
             }
             return existscart;
@@ -66,11 +60,11 @@ namespace ServiceLayer.Mongo
             Cart existscart = new Cart();
             if (userid != null && userid.HasValue)
             {
-                existscart = await _cart.Find(x => x.Created_By == userid).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
             }
             else
             {
-                existscart = await _cart.Find(x => x.CookieValue == cartDetailDC.CookieValue).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == cartDetailDC.CookieValue).FirstOrDefaultAsync();
 
             }
 
@@ -78,20 +72,20 @@ namespace ServiceLayer.Mongo
             {
                 var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
                                                 f => f.ProductId == cartDetailDC.ProductId);
-                var result = _cart
+                var result = _mongoHelper.OrderCollection()
                     .FindOneAndUpdateAsync(p => p.Id == existscart.Id, update).Result;
                 return result.Id;
             }
             else if (existscart != null && cartDetailDC.Quantity == 0 && existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId) && existscart.cartDetails.Count == 1)
             {
-                await _cart.DeleteOneAsync(x => x.Id == existscart.Id);
+                await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == existscart.Id);
                 return null;
             }
             else
             {
                 List<CartDetails> listcartDetails = new List<CartDetails>();
                 Cart cart = new Cart();
-                var data = await _unitofWork.ProductMasterRepository.GetProduct(cartDetailDC.ProductId);
+                var data = await _productMasterRepository.GetProduct(cartDetailDC.ProductId);
                 if (data != null)
                 {
                     CartDetails cartDetails = Mapper.Map(data).ToANew<CartDetails>();
@@ -141,10 +135,7 @@ namespace ServiceLayer.Mongo
 
                     existscart.Updated_By = userid;
                     existscart.Updated_Date = DateTime.Now;
-                    //var update = Builders<CartDetails>.Filter.Where(s => s.ProductId== cartDetailDC.ProductId);
-                    //var updatecurrentcart= Builders<CartDetails>.Update.Set(s => s.Quantity, data.Quantity);
-                    //var result = await _cart.UpdateOneAsync(filter, update);
-                    await _cart.ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
+                    await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
                     return existscart.Id;
 
                 }
@@ -160,7 +151,7 @@ namespace ServiceLayer.Mongo
                     //var update = Builders<CartDetails>.Filter.Where(s => s.ProductId== cartDetailDC.ProductId);
                     //var updatecurrentcart= Builders<CartDetails>.Update.Set(s => s.Quantity, data.Quantity);
                     //var result = await _cart.UpdateOneAsync(filter, update);
-                    await _cart.ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
+                    await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
                     return existscart.Id;
                 }
 
@@ -168,7 +159,7 @@ namespace ServiceLayer.Mongo
 
                 else
                 {
-                    await _cart.InsertOneAsync(cart);
+                    await _mongoHelper.OrderCollection().InsertOneAsync(cart);
                 }
 
                 return cart.Id;
@@ -179,22 +170,22 @@ namespace ServiceLayer.Mongo
 
 
         public async Task UpdateAsync(string id, Cart updatedBook) =>
-            await _cart.ReplaceOneAsync(x => x.Id == id, updatedBook);
+            await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == id, updatedBook);
 
-        public async Task<bool> RemoveAsync( string cookievalue)
+        public async Task<bool> RemoveAsync(string cookievalue)
         {
             Cart existscart = new Cart();
             if (userid != null && userid.HasValue)
             {
-                existscart = await _cart.Find(x => x.Created_By == userid).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
             }
             else
             {
-                existscart = await _cart.Find(x => x.CookieValue == cookievalue).FirstOrDefaultAsync();
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == cookievalue).FirstOrDefaultAsync();
 
             }
 
-            var res = await _cart.DeleteOneAsync(x => x.Id == existscart.Id);
+            var res = await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == existscart.Id);
             if (res.IsAcknowledged)
             {
                 return true;

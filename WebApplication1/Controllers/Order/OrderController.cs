@@ -1,37 +1,35 @@
 ﻿using DataContract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Auth;
 using ServiceLayer.Helper;
-using ServiceLayer.Interface.IHelper;
-using ServiceLayer.Interface.IService;
 using ServiceLayer.Order;
 
 namespace Suppliment.API.Controllers.Order
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class OrderController : ControllerBase
     {
-        public IOrderService _orderService;
-        public IAuthService _authService;
-        public IWhatsApp _whatsAppHelper;
-        public OrderController(IOrderService orderService, IAuthService authService, IWhatsApp whatsAppHelper)
+        public OrderService _orderService;
+        public WhatsAppHelper _whatsAppHelper;
+        public OrderController(OrderService orderService, WhatsAppHelper whatsAppHelper)
         {
 
             _orderService = orderService;
-            _authService = authService;
             _whatsAppHelper = whatsAppHelper;
         }
-        [HttpPost]
-
-        public async Task<IActionResult> PlaceOrder(List<OrderDetailDC> orderdetailDc)
+        [HttpGet]
+        //[Authorize(Roles ="User")]
+        public async Task<IActionResult> PlaceOrder(string mongoId)
         {
-            long? userid = _authService.GetUserId();
-            bool res = await _orderService.SubmitOrder(orderdetailDc, userid);
-            if (res)
+            
+            long? res = await _orderService.SubmitOrder(mongoId);
+            if (res!=null && res>0)
             {
-                return Ok(true);
+                return Ok(res);
             }
             else
             {
@@ -39,11 +37,11 @@ namespace Suppliment.API.Controllers.Order
             }
         }
 
-        [HttpGet]
-        public IActionResult SendSMs()
-        {
-            _whatsAppHelper.SendSMS();
-            return Ok(true);
-        }
+        //[HttpGet]
+        //public IActionResult SendSMs()
+        //{
+        //    _whatsAppHelper.SendSMS();
+        //    return Ok(true);
+        //}
     }
 }

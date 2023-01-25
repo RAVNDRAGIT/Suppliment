@@ -1,5 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using ServiceLayer.Interface.IHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Helper
 {
-    public class WhatsAppHelper: IWhatsApp
+    public class WhatsAppHelper
     {
         public void SendSMS()
         {

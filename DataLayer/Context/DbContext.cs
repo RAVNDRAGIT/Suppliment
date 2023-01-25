@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -14,18 +15,15 @@ namespace DataLayer.Context
     public class DbContext
     {
         private readonly IConfiguration _configuration;
-        private readonly string _connectionString;
-       
+        
+
         public DbContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("SqlConnection");
+            
 
         }
-        public IDbConnection CreateConnection()
-        {
-            return new SqlConnection(_connectionString);
-        }
+        
         public string AuthKey()
         {
             string _authKey = _configuration.GetSection("Key").GetSection("userKey").Value;
@@ -49,6 +47,14 @@ namespace DataLayer.Context
             string con = _configuration.GetSection("MongoDbDC").GetSection("OrderCollectionName").Value;
             return con;
         }
+       
+        private void ResetRepositories()
+        {
+
+        }
+
+        
+        
     }
 }
 

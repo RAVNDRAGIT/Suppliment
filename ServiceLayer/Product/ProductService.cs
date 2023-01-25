@@ -3,7 +3,6 @@ using BusinessLayer.ProductMaster;
 using DataContract;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
-using ServiceLayer.Interface.IService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +12,14 @@ using System.Threading.Tasks;
 namespace ServiceLayer.Product
 {
 
-    public class ProductService : IProductMasterService
+    public class ProductService 
     {
         public IUnitOfWork _unitOfWork;
-        public ProductService(IUnitOfWork unitOfWork)
+        public IProductMasterRepository _productMasterRepository;
+        public ProductService(IUnitOfWork unitOfWork, IProductMasterRepository productMasterRepository)
         {
             _unitOfWork = unitOfWork;
+            _productMasterRepository=productMasterRepository;
         }
         public async Task<bool> AddProduct(ProductMasterDC productMasterDC)
         {
@@ -26,7 +27,7 @@ namespace ServiceLayer.Product
             if (productMasterDC != null)
             {
                 var productMaster = Mapper.Map(productMasterDC).ToANew<ProductMaster>();
-                bool res = await _unitOfWork.ProductMasterRepository.AddProduct(productMaster);
+                bool res = await _productMasterRepository.AddProduct(productMaster);
                 if (res)
                 {
 

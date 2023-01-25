@@ -1,8 +1,13 @@
 ﻿using AgileObjects.AgileMapper;
+using BusinessLayer;
 using BusinessLayer.Order;
 using DataContract;
+using DataLayer.Context;
+using DataLayer.Infrastructure;
 using DataLayer.Interface;
-using ServiceLayer.Interface.IService;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,58 +16,88 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Order
 {
-    public class OrderService : IOrderService
+    public class OrderService 
     {
+      //  private readonly IMongoCollection<Cart> _cart;
         public IUnitOfWork _unitOfWork;
-        public OrderService(IUnitOfWork unitOfWork)
+        private long? userid;
+        public JwtMiddleware _jwtMiddleware;
+        public IOrderMasterRepository _orderMasterRepository;
+        public IOrderDetailRepository _orderDetailRepository;
+        public MongoHelper _mongoHelper;
+    
+        public OrderService(IUnitOfWork unitOfWork,   JwtMiddleware jwtMiddleware,MongoHelper mongoHelper)
         {
+           
             _unitOfWork = unitOfWork;
+            _mongoHelper = mongoHelper;
+            //var mongoClient = new MongoClient(
+            //  _unitOfWork.MongoConString());
+
+            //var mongoDatabase = mongoClient.GetDatabase(
+            //    _unitOfWork.MongoDbName());
+            //_cart = mongoDatabase.GetCollection<Cart>(
+            //    _unitOfWork.MongoOrderCollection());
+            _jwtMiddleware = jwtMiddleware;
+            userid = _jwtMiddleware.GetUserId();
+      
+           
         }
-        public async Task<bool> SubmitOrder(List<OrderDetailDC> orderDetailDC, long? userid)
+        public async Task<long?> SubmitOrder(string mongoId)
         {
-            bool result = false;
+           
+
+            long? orderid = null;
             long currentuserid = userid ?? 0;
-            orderDetailDC.ForEach(x =>
+            var cart= await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid && x.Id== mongoId).FirstOrDefaultAsync();
+            if (cart != null)
             {
-                x.TotalMrp = x.Mrp * x.Quantity;
-                x.TotalPrice = x.Price * x.Quantity;
-                x.TotalDiscount = (x.Mrp * x.Quantity) - (x.Price * x.Quantity);
-
-            });
-            double TotalMrp = orderDetailDC.Sum(x => x.TotalMrp);
-            double TotalPrice = orderDetailDC.Sum(x => x.TotalPrice);
-            double TotalDiscount = orderDetailDC.Sum(x => x.TotalDiscount);
-
-            OrderMaster orderMaster = new OrderMaster
-            {
-                IsActive = true,
-                IsDelete = false,
-                IsPaid = false,
-                TotalDiscount = TotalDiscount,
-                TotalMrp = TotalMrp,
-                TotalPrice = TotalPrice
-            };
-
-            long orderresult = await _unitOfWork.OrderMasterRepository.SaveOrder(orderMaster, currentuserid);
-            if (orderresult > 0)
-            {
-                List<OrderDetail> orderDetail = Mapper.Map(orderDetailDC).ToANew<List<OrderDetail>>();
-                orderDetail.ForEach(x =>
+                
+                var orderMaster = Mapper.Map(cart).ToANew<OrderMaster>();
+                long orderresult = await _unitOfWork.OrderMasterRepository.SaveOrder(orderMaster, currentuserid);
+                
+                if (orderresult > 0)
                 {
-                    x.Created_By = currentuserid;
-                    x.Created_Date = DateTime.Now;
-                    x.Updated_By = currentuserid;
-                    x.Updated_Date = DateTime.Now;
-                });
+                    List<OrderDetail> orderDetail = Mapper.Map(cart.cartDetails).ToANew<List<OrderDetail>>();
+                    orderDetail.ForEach(x =>
+                    {
+                        x.Created_By = currentuserid;
+                        x.Created_Date = DateTime.Now;
+                        x.Updated_By = currentuserid;
+                        x.Updated_Date = DateTime.Now;
+                        x.OrderId = orderresult;
+                        x.IsActive = true;
+                        x.IsDelete = false;
+                    });
+                    
+                    bool orderdetailres = await _unitOfWork.OrderDetailRepository.SaveOrderDetail(orderDetail);
+                    if (orderdetailres)
+                    {
+                        List<ProductQuantityDC> productQuantities = new List<ProductQuantityDC>();
+                        foreach (var data in orderDetail)
+                        {
+                            ProductQuantityDC productQuantityDC = new ProductQuantityDC();
+                            productQuantityDC.Quantity = data.Quantity;
+                            productQuantityDC.ProductMasterId = data.ProductId;
+                            productQuantities.Add(productQuantityDC);
+                        }
+                        long res = await _unitOfWork.OrderMasterRepository.UpdateOrderStock(productQuantities, currentuserid);
+                        if (res >= 0 )
+                        {
 
-                bool orderdetailres = await _unitOfWork.OrderDetailRepository.SaveOrderDetail(orderDetail);
-                if (orderdetailres)
-                {
-                    _unitOfWork.Commit();
-                    result = true;
+                            var cartres = await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == cart.Id);
+                            if (cartres.IsAcknowledged)
+                            {
+                                orderid = orderresult;
+                                _unitOfWork.Commit();
+                            }
+                        }
+
+
+                    }
                 }
             }
-            return result;
+            return orderid;
         }
     }
 }

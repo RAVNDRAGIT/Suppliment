@@ -1,10 +1,12 @@
 ﻿using Dapper.Contrib.Extensions;
 using DataLayer.Context;
+using DataLayer.Interface;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,25 +15,33 @@ namespace DataLayer.Infrastructure
 {
     public class GenericRepository<T> where T : class
     {
+        private SqlConnection _connection;
+
+       
 
         protected IDbTransaction _transaction;
 
-      //  private DbContext _dbContext;
+       //private DbContext _dbContext;
 
         protected readonly DbContext _dbContext;
 
-        protected GenericRepository(DbContext context)
+        public GenericRepository(SqlConnection sqlConnection, IDbTransaction transaction)
         {
-            _dbContext = context;
+            _transaction = transaction;
+            _connection = sqlConnection;
         }
-        protected IDbConnection _connection
-        {
-            get
-            {
+        //protected GenericRepository(DbContext context)
+        //{
+        //    _dbContext = context;
+        //}
+        //protected IDbConnection _connection
+        //{
+        //    get
+        //    {
 
-                return _dbContext.CreateConnection();
-            }
-        }
+        //        return _dbContext.CreateConnection();
+        //    }
+        //}
 
         public async Task<dynamic> InsertAsync(T entity)
         {

@@ -9,36 +9,46 @@ using DataLayer.Repository.Order;
 using DataLayer.Repository.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ServiceLayer.Auth;
+using ServiceLayer.Carts;
 using ServiceLayer.File;
 using ServiceLayer.Helper;
-using ServiceLayer.Interface.IHelper;
-using ServiceLayer.Interface.IService;
-using ServiceLayer.Mongo;
 using ServiceLayer.Order;
 using ServiceLayer.Product;
+using System.Data;
 using System.Security.Cryptography.Xml;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<DbContext>();
+builder.Services.AddScoped<DbContext>();
+builder.Services.AddScoped((s) => new SqlConnection(builder.Configuration.GetConnectionString("SqlConnection")));
+builder.Services.AddScoped<IDbTransaction>(s =>
+{
+    SqlConnection conn = s.GetRequiredService<SqlConnection>();
+    conn.Open();
+    return conn.BeginTransaction();
+});
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductMasterRepository, ProductMasterRepository>();
-builder.Services.AddScoped<IProductMasterService, ProductService>();
+builder.Services.AddScoped< ProductService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IJwtMiddleware, JwtMiddleware>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<JwtMiddleware>();
+builder.Services.AddScoped< AuthService>();
 builder.Services.AddScoped<IOrderMasterRepository, OrderMasterRepository>();
 builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IFileService,FileService>();
-builder.Services.AddScoped<IWhatsApp, WhatsAppHelper>();
+builder.Services.AddScoped< OrderService>();
+builder.Services.AddScoped<FileService>();
+builder.Services.AddScoped< WhatsAppHelper>();
+builder.Services.AddScoped<MongoHelper>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
 builder.Services.Configure<MongoDbDC>(
     builder.Configuration.GetSection("Order"));

@@ -1,10 +1,10 @@
 ﻿using BusinessLayer;
 using DataContract;
 using DataLayer.Context;
+using DataLayer.Interface;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
-using ServiceLayer.Interface.IHelper;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,11 +15,12 @@ using System.Threading.Tasks;
 
 namespace ServiceLayer.Helper
 {
-    public class JwtMiddleware : IJwtMiddleware
+    public class JwtMiddleware 
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly DbContext _dbContext;
-        public JwtMiddleware(IHttpContextAccessor httpContextAccessor, DbContext dbContext)
+        //private readonly DbContext _dbContext;
+        private readonly IUnitOfWork _dbContext;
+        public JwtMiddleware(IHttpContextAccessor httpContextAccessor, IUnitOfWork dbContext)
         {
             _httpContextAccessor = httpContextAccessor;
             _dbContext = dbContext;
@@ -83,6 +84,29 @@ namespace ServiceLayer.Helper
 
             // 5. Return Token from method
             return tokenHandler.WriteToken(token);
+        }
+        public string GetUserName()
+        {
+            var jwtToken = JwtToken();
+            var username = jwtToken.Claims.First(x => x.Type == "UserName").Value;
+            return username;
+
+        }
+
+        public long? GetUserId()
+        {
+            var jwtToken = JwtToken();
+            if (jwtToken != null)
+            {
+                var userid = int.Parse(jwtToken.Claims.First(x => x.Type == "UserId").Value);
+                return userid;
+            }
+            else
+            {
+                return null;
+            }
+
+
         }
     }
 }

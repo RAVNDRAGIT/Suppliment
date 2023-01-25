@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.File;
-using ServiceLayer.Interface.IService;
 
 namespace Suppliment.API.Controllers.File
 {
@@ -9,8 +8,8 @@ namespace Suppliment.API.Controllers.File
     [ApiController]
     public class ImageController : ControllerBase
     {
-        public readonly  IFileService _fileService;
-        public ImageController(IFileService fileService) {
+        public readonly FileService _fileService;
+        public ImageController(FileService fileService) {
             _fileService=fileService;
         }
 

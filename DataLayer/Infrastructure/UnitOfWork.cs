@@ -12,74 +12,83 @@ using System.Threading.Tasks;
 using DataLayer.Interface;
 using DataLayer.Context;
 using DataLayer.Repository.Auth;
+using System.Transactions;
 
 namespace DataLayer.Infrastructure
 {
-    public class UnitOfWork :IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly IConfiguration _configuration;
-        private IDbConnection _connection;
-        private IDbTransaction _transaction;
-        public IProductMasterRepository ProductMasterRepository { get; }
-        public IUserRepository UserRepository { get; }
-        public IOrderMasterRepository OrderMasterRepository { get; }
-        public IOrderDetailRepository OrderDetailRepository { get; }
-       
+      
+         private DbContext _dbContext;
 
-        //private DbContext _dbContext;
-        //private string connStr => _dbContext.CreateConnection().ConnectionString;
-
+        IDbTransaction _dbTransaction;
         #region Configuration
+        public IOrderDetailRepository OrderDetailRepository
+        { get;  }
+        public IOrderMasterRepository OrderMasterRepository 
+        { get; }
 
-        public UnitOfWork(DbContext dbContext, IProductMasterRepository productMasterRepository, IUserRepository userRepository, IOrderMasterRepository orderMasterRepository, IOrderDetailRepository orderDetailRepository)
+
+
+
+
+        public UnitOfWork(DbContext dbContext, IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository)
         {
-            //_configuration = configuration;
-            _connection = new SqlConnection();
-            //_connection.ConnectionString = _configuration.GetConnectionString("SqlConnection");
-            _connection.ConnectionString = dbContext.CreateConnection().ConnectionString;
-            _connection.Open();
-            _transaction = _connection.BeginTransaction();
-            ProductMasterRepository = productMasterRepository;
-            UserRepository = userRepository;
-            OrderMasterRepository = orderMasterRepository;
+            _dbContext = dbContext;
+            _dbTransaction = dbTransaction;
             OrderDetailRepository = orderDetailRepository;
+            OrderMasterRepository = orderMasterRepository;
         }
         public void Commit()
         {
             try
             {
-                _transaction.Commit();
+                _dbTransaction.Commit();
+                // By adding this we can have muliple transactions as part of a single request
+                //_dbTransaction.Connection.BeginTransaction();
             }
-            catch
+            catch (Exception ex)
             {
-                _transaction.Rollback();
-                throw;
+                _dbTransaction.Rollback();
             }
-            finally
-            {
-                _transaction.Dispose();
-                //_transaction = _connection.BeginTransaction();
-                ResetRepositories();
-            }
+           
         }
         public void Dispose()
         {
-            if (_transaction != null)
-            {
-                _transaction.Dispose();
-                _transaction = null;
-            }
-
-            if (_connection != null)
-            {
-                _connection.Dispose();
-                _connection = null;
-            }
-        }
-        private void ResetRepositories()
-        {
+            _dbTransaction.Connection?.Close();
+            _dbTransaction.Connection?.Dispose();
+            _dbTransaction.Dispose();
             
+           
         }
+        
+
+        public string AuthKey()
+        {
+           
+            string authKey = _dbContext.AuthKey();
+            return authKey;
+        }
+
+        public string MongoConString()
+        {
+            string con = _dbContext.MongoConString();
+            return con;
+        }
+
+        public string MongoDbName()
+        {
+            string con = _dbContext.MongoDbName();
+            return con;
+        }
+
+        public string MongoOrderCollection()
+        {
+            string con = _dbContext.MongoOrderCollection();
+            return con;
+        }
+
+       
         #endregion
     }
 }

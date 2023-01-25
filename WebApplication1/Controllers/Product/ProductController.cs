@@ -4,7 +4,7 @@ using DataContract;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer;
-using ServiceLayer.Interface.IService;
+using ServiceLayer.Product;
 using Suppliment.API.Model;
 
 namespace Suppliment.API.Controllers.Product
@@ -13,9 +13,9 @@ namespace Suppliment.API.Controllers.Product
     [ApiController]
     public class ProductController : ControllerBase
     {
-        public readonly IProductMasterService  _productMasterService;
+        public readonly ProductService  _productMasterService;
        
-        public ProductController(IProductMasterService productMasterService )
+        public ProductController(ProductService productMasterService )
         {
             _productMasterService = productMasterService;
         }

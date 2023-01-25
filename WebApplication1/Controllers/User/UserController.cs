@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ServiceLayer.Interface.IService;
+using ServiceLayer.Auth;
 
 namespace Suppliment.API.Controllers.User
 {
@@ -10,15 +10,16 @@ namespace Suppliment.API.Controllers.User
     [ApiController]
     public class UserController : ControllerBase
     {
-        public readonly IAuthService    _iauthService ;
+        public readonly AuthService _authService ;
         
-        public UserController(IAuthService iauthService) { 
-        _iauthService= iauthService;
+
+        public UserController(AuthService iauthService) {
+            _authService = iauthService;
         }
         [HttpPost]
         public IActionResult Authentication(UserCredentialDC logincredentail)
         {
-            var result =  _iauthService.Token(logincredentail);
+            var result = _authService.Token(logincredentail);
 
             if (result==null)
             {
@@ -30,14 +31,14 @@ namespace Suppliment.API.Controllers.User
             }
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer",Roles ="Admin")]
+        //[Authorize(AuthenticationSchemes = "Bearer",Roles ="Admin")]
 
-        [HttpGet]
-        public IActionResult GetUserName()
-        {
-            string username = _iauthService.GetUserName();
-            return Ok(username);
+        //[HttpGet]
+        //public IActionResult GetUserName()
+        //{
+        //    string username = _iauthService.GetUserName();
+        //    return Ok(username);
 
-        }
+        //}
     }
 }
