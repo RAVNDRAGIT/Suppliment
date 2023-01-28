@@ -59,10 +59,10 @@ namespace DataLayer.Repository.Order
             }
             dbArgs.Add(name: "@UpdatedBy", value: userid);
             dbArgs.Add(name: "@PRODUCTQUANTITY", value: dt.AsTableValuedParameter("[dbo].[productQuantity]"));
-            var res = await _sqlConnection.QueryAsync<long>("[dbo].[UpdateStockQuantity]",param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure);
+            var res = await _sqlConnection.ExecuteAsync("[dbo].[UpdateStockQuantity]",param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure);
            
 
-            return res.FirstOrDefault();
+            return res;
 
         }
 

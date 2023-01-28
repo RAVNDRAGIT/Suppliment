@@ -2,6 +2,7 @@
 using BusinessLayer;
 using BusinessLayer.Order;
 using DataContract;
+using DataContract.Order;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -22,8 +23,6 @@ namespace ServiceLayer.Order
         public IUnitOfWork _unitOfWork;
         private long? userid;
         public JwtMiddleware _jwtMiddleware;
-        public IOrderMasterRepository _orderMasterRepository;
-        public IOrderDetailRepository _orderDetailRepository;
         public MongoHelper _mongoHelper;
     
         public OrderService(IUnitOfWork unitOfWork,   JwtMiddleware jwtMiddleware,MongoHelper mongoHelper)
@@ -31,25 +30,19 @@ namespace ServiceLayer.Order
            
             _unitOfWork = unitOfWork;
             _mongoHelper = mongoHelper;
-            //var mongoClient = new MongoClient(
-            //  _unitOfWork.MongoConString());
-
-            //var mongoDatabase = mongoClient.GetDatabase(
-            //    _unitOfWork.MongoDbName());
-            //_cart = mongoDatabase.GetCollection<Cart>(
-            //    _unitOfWork.MongoOrderCollection());
+            
             _jwtMiddleware = jwtMiddleware;
-            userid = _jwtMiddleware.GetUserId();
+           
       
            
         }
-        public async Task<long?> SubmitOrder(string mongoId)
+        public async Task<long?> SubmitOrder(CheckOutOrderDC checkOutOrderDC)
         {
            
 
             long? orderid = null;
-            long currentuserid = userid ?? 0;
-            var cart= await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid && x.Id== mongoId).FirstOrDefaultAsync();
+            long currentuserid = _jwtMiddleware.GetUserId() ?? 0;
+            var cart= await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid && x.Id== checkOutOrderDC.MongoId).FirstOrDefaultAsync();
             if (cart != null)
             {
                 
@@ -73,25 +66,8 @@ namespace ServiceLayer.Order
                     bool orderdetailres = await _unitOfWork.OrderDetailRepository.SaveOrderDetail(orderDetail);
                     if (orderdetailres)
                     {
-                        List<ProductQuantityDC> productQuantities = new List<ProductQuantityDC>();
-                        foreach (var data in orderDetail)
-                        {
-                            ProductQuantityDC productQuantityDC = new ProductQuantityDC();
-                            productQuantityDC.Quantity = data.Quantity;
-                            productQuantityDC.ProductMasterId = data.ProductId;
-                            productQuantities.Add(productQuantityDC);
-                        }
-                        long res = await _unitOfWork.OrderMasterRepository.UpdateOrderStock(productQuantities, currentuserid);
-                        if (res >= 0 )
-                        {
-
-                            var cartres = await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == cart.Id);
-                            if (cartres.IsAcknowledged)
-                            {
-                                orderid = orderresult;
-                                _unitOfWork.Commit();
-                            }
-                        }
+                        _unitOfWork.Commit();
+                       
 
 
                     }

@@ -8,6 +8,7 @@ namespace Suppliment.API.Controllers.Order
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     //[Authorize(Roles ="User")]
     public class AssignCart : ControllerBase
     {

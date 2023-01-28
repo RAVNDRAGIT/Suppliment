@@ -13,5 +13,6 @@ namespace BusinessLayer.Order
         public double TotalDiscount { get; set; }
         public bool IsPaid { get; set; }
         public int Status { get; set; }
+        public long UserLocationId { get; set; }
     }
 }

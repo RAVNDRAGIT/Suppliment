@@ -11,5 +11,6 @@ namespace DataLayer.Interface
     public interface IOrderDetailRepository
     {
         Task<bool> SaveOrderDetail(List<OrderDetail> orderDetail);
+        Task<List<OrderDetailDC>> GetOrderDetailsbyOrderId(long orderid);
     }
 }

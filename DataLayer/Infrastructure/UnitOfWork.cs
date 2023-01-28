@@ -19,7 +19,7 @@ namespace DataLayer.Infrastructure
     public class UnitOfWork : IUnitOfWork
     {
       
-         private DbContext _dbContext;
+       
 
         IDbTransaction _dbTransaction;
         #region Configuration
@@ -30,13 +30,16 @@ namespace DataLayer.Infrastructure
 
         public IUserRepository UserRepository { get; }
 
-        public UnitOfWork(DbContext dbContext, IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository)
+        public IUserLocationRepository UserLocationRepository { get; }
+
+        public UnitOfWork( IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository,IUserLocationRepository userLocationRepository)
         {
-            _dbContext = dbContext;
+           
             _dbTransaction = dbTransaction;
             OrderDetailRepository = orderDetailRepository;
             OrderMasterRepository = orderMasterRepository;
             UserRepository = userRepository;
+            UserLocationRepository = userLocationRepository;
         }
         public void Commit()
         {

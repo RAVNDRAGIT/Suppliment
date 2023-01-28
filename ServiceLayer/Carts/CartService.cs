@@ -175,7 +175,7 @@ namespace ServiceLayer.Carts
             Cart existingcartuser = new Cart();
             var currentcart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == assignCartDC.CookieValue).FirstOrDefaultAsync();
 
-            if (userid != null && userid.HasValue)
+            if (userid != null && userid.HasValue && currentcart!=null)
             {
                 existingcartuser = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
                 if (existingcartuser != null)

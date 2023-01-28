@@ -31,6 +31,14 @@ namespace DataContract.Payment
         public Refunds refunds { get; set; }
         public Settlements settlements { get; set; }
         public object terminal_data { get; set; }
+        public long Created_By { get; set; }
+
+        public DateTime Created_Date { get; set; }
+
+        public long Updated_By { get; set; }
+        public DateTime Updated_Date { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsDelete { get; set; }
     }
    
 

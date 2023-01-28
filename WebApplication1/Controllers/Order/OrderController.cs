@@ -1,4 +1,5 @@
 ﻿using DataContract;
+using DataContract.Order;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,10 +24,10 @@ namespace Suppliment.API.Controllers.Order
         }
         [HttpGet]
         //[Authorize(Roles ="User")]
-        public async Task<IActionResult> PlaceOrder(string mongoId)
+        public async Task<IActionResult> PlaceOrder(CheckOutOrderDC checkOutOrderDC)
         {
             
-            long? res = await _orderService.SubmitOrder(mongoId);
+            long? res = await _orderService.SubmitOrder(checkOutOrderDC);
             if (res!=null && res>0)
             {
                 return Ok(res);

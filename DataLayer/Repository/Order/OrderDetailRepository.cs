@@ -1,6 +1,8 @@
 ﻿using BusinessLayer.Order;
+using Dapper;
 using Dapper.Contrib.Extensions;
 using DataContract;
+using DataContract.Address;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -40,6 +42,16 @@ namespace DataLayer.Repository.Order
                 return false;
             }
 
+        }
+
+        public async Task<List<OrderDetailDC>> GetOrderDetailsbyOrderId(long orderid)
+        {
+            var dbArgs = new DynamicParameters();
+            dbArgs.Add(name: "@orderid", value: orderid);
+
+            //var data =(_sqlConnection.QueryMultiple<AddressDetailDC>)
+            var data = (await _sqlConnection.QueryAsync<OrderDetailDC>("GetOrderDetailsbyOrderId", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000)).ToList();
+            return data;
         }
     }
 }

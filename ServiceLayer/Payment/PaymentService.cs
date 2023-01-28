@@ -1,4 +1,6 @@
 ﻿
+using BusinessLayer.Order;
+using DataContract;
 using DataContract.Payment;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
@@ -111,6 +113,12 @@ namespace ServiceLayer.Payment
                 
                 string resultContent = await result.Content.ReadAsStringAsync();
                 var res = JsonSerializer.Deserialize<CreateOrderResponseDC>(resultContent);
+                    res.IsActive = true;
+                    res.IsDelete = false;
+                    res.Created_By = userid;
+                    res.Created_Date= DateTime.Now;
+                    res.Updated_By=userid;
+                    res.Updated_By= userid;
                 await _mongoHelper.OrderResponseCollection().InsertOneAsync(res);
                 return res.payment_session_id;
                 }
@@ -171,7 +179,13 @@ namespace ServiceLayer.Payment
                 var data = await _mongoHelper.OrderResponseCollection().Find(x => x.order_id == createOrderResponseDC.order_id).FirstOrDefaultAsync();
                 if (data != null)
                 {
-                    await _mongoHelper.OrderResponseCollection().ReplaceOneAsync(x => x.order_id == createOrderResponseDC.order_id, createOrderResponseDC, new UpdateOptions { IsUpsert = true });
+
+                    createOrderResponseDC.Updated_By = userid;
+                    createOrderResponseDC.Updated_Date = DateTime.Now;
+                    createOrderResponseDC.Id = data.Id;
+                    createOrderResponseDC.IsActive = true;
+                    createOrderResponseDC.IsDelete = false;
+                    await _mongoHelper.OrderResponseCollection().ReplaceOneAsync(x => x.Id == data.Id, createOrderResponseDC, new UpdateOptions { IsUpsert = true });
                     bool orderstatus = false;
                     if (createOrderResponseDC.order_status == "PAID")
                     {
@@ -180,8 +194,28 @@ namespace ServiceLayer.Payment
                     bool updateorderresult = await _unitOfWork.OrderMasterRepository.UpdateOrderPayment(Convert.ToInt64(data.order_id), orderstatus, userid);
                     if (updateorderresult)
                     {
-                        _unitOfWork.Commit();
-                        finalresult = true;
+                        var orderdetailresult = await _unitOfWork.OrderDetailRepository.GetOrderDetailsbyOrderId(Convert.ToInt64(data.order_id));
+                        List<ProductQuantityDC> productQuantities = new List<ProductQuantityDC>();
+                        foreach (var orddtl in orderdetailresult)
+                        {
+                            ProductQuantityDC productQuantityDC = new ProductQuantityDC();
+                            productQuantityDC.Quantity = orddtl.Quantity;
+                            productQuantityDC.ProductMasterId = orddtl.ProductId;
+                            productQuantities.Add(productQuantityDC);
+                        }
+                        long res = await _unitOfWork.OrderMasterRepository.UpdateOrderStock(productQuantities, userid);
+                        if (res >= 0)
+                        {
+
+                            var cartres = await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == data.Id);
+                            if (cartres.IsAcknowledged)
+                            {
+
+                                _unitOfWork.Commit();
+                                finalresult = true;
+                            }
+                        }
+                       
 
                     }
 
