@@ -13,5 +13,6 @@ namespace DataContract
         public string DatabaseName { get; set; } = null!;
 
         public string OrderCollectionName { get; set; } = null!;
+        public string PaymentOrderResponse { get; set; } = null!;
     }
 }

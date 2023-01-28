@@ -47,7 +47,46 @@ namespace DataLayer.Context
             string con = _configuration.GetSection("MongoDbDC").GetSection("OrderCollectionName").Value;
             return con;
         }
-       
+
+        public string MongoOrderPaymentCollection()
+        {
+            string con = _configuration.GetSection("MongoDbDC").GetSection("OrderPayment").Value;
+            return con;
+        }
+
+       public string GetNotifyUrl()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("notify_url").Value;
+            return url;
+        }
+
+        public string GetReturnUrl()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("return_url").Value;
+            return url;
+        }
+
+        public string GetBaseUrl()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("base_url").Value;
+            return url;
+        }
+        public string GetClientId()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("client-id").Value;
+            return url;
+        }
+
+        public string GetClientSecret()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("client-secret").Value;
+            return url;
+        }
+        public string GetApiVersion()
+        {
+            string url = _configuration.GetSection("PaymentIntegration").GetSection("api-version").Value;
+            return url;
+        }
         private void ResetRepositories()
         {
 

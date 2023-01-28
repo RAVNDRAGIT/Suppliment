@@ -12,5 +12,7 @@ namespace DataLayer.Interface
     {
         Task<long> SaveOrder(OrderMaster orderMaster,long userid);
         Task<long> UpdateOrderStock(List<ProductQuantityDC> productQuantities, long userid);
+        Task<OrderMaster> GetOrder(long orderid);
+        Task<bool> UpdateOrderPayment(long orderid,bool ispaid,long userid);
     }
 }

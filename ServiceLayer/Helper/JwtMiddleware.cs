@@ -19,8 +19,8 @@ namespace ServiceLayer.Helper
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         //private readonly DbContext _dbContext;
-        private readonly IUnitOfWork _dbContext;
-        public JwtMiddleware(IHttpContextAccessor httpContextAccessor, IUnitOfWork dbContext)
+        private readonly DbContext  _dbContext;
+        public JwtMiddleware(IHttpContextAccessor httpContextAccessor, DbContext dbContext)
         {
             _httpContextAccessor = httpContextAccessor;
             _dbContext = dbContext;
@@ -35,7 +35,7 @@ namespace ServiceLayer.Helper
             var key = Encoding.ASCII.GetBytes(secretkey);
             var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
 
-            if (!string.IsNullOrEmpty(token))
+            if (Convert.ToString( token)!=null && token!="" && token!="null")
             {
                 tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {

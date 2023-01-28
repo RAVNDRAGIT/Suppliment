@@ -65,5 +65,25 @@ namespace DataLayer.Repository.Order
             return res.FirstOrDefault();
 
         }
+
+        public async Task<OrderMaster> GetOrder(long orderid)
+        {
+            var data = await _sqlConnection.GetAsync<OrderMaster>(orderid, _transaction);
+            return data;
+        }
+
+        public async Task<bool> UpdateOrderPayment(long orderid,bool ispaid,long userid)
+        {
+            var data = await _sqlConnection.GetAsync<OrderMaster>(orderid, _transaction);
+            if(data!=null)
+            {
+                data.IsPaid = ispaid;
+                data.Updated_Date = DateTime.Now;
+                data.Updated_By = userid;
+            }
+
+            bool result = await _sqlConnection.UpdateAsync<OrderMaster>(data, _transaction);
+            return result;
+        }
     }
 }

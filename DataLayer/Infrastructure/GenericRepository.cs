@@ -70,13 +70,13 @@ namespace DataLayer.Infrastructure
         }
 
 
-        public async Task<T> GetByIdAsync(int Id)
+        public async Task<T> GetByIdAsync(long Id)
         {
             var entity = await _connection.GetAsync<T>(Id, _transaction);
             return entity;
         }
 
-        public T GetById(int Id)
+        public T GetById(long Id)
         {
             T entity = _connection.Get<T>(Id, _transaction);
             return entity;

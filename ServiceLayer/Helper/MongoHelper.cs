@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Order;
+using DataContract.Payment;
 using DataLayer.Context;
 using MongoDB.Driver;
 using System;
@@ -15,6 +16,7 @@ namespace ServiceLayer.Helper
         private readonly IMongoCollection<Cart> _cart;
         private readonly string _connectionString;
         private readonly string _dBName;
+        private readonly IMongoCollection<CreateOrderResponseDC> _createorderResponse;
         public MongoHelper(DbContext dbContext)
         {
             _dbContext = dbContext;
@@ -25,6 +27,8 @@ namespace ServiceLayer.Helper
                 _dbContext.MongoDbName());
             _cart = mongoDatabase.GetCollection<Cart>(
                 _dbContext.MongoOrderCollection());
+            _createorderResponse = mongoDatabase.GetCollection<CreateOrderResponseDC>(
+                _dbContext.MongoOrderPaymentCollection());
         }
 
         public MongoClient GetMongoConstr()
@@ -48,6 +52,15 @@ namespace ServiceLayer.Helper
                _dbContext.MongoOrderCollection());
             return collection;
         }
+
+        public IMongoCollection<CreateOrderResponseDC> OrderResponseCollection()
+        {
+            var mongoDatabase = GetDatabase();
+            var collection = mongoDatabase.GetCollection<CreateOrderResponseDC>(
+               _dbContext.MongoOrderPaymentCollection());
+            return collection;
+        }
+
 
     }
 }

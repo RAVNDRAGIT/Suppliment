@@ -28,16 +28,15 @@ namespace DataLayer.Infrastructure
         public IOrderMasterRepository OrderMasterRepository 
         { get; }
 
+        public IUserRepository UserRepository { get; }
 
-
-
-
-        public UnitOfWork(DbContext dbContext, IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository)
+        public UnitOfWork(DbContext dbContext, IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository)
         {
             _dbContext = dbContext;
             _dbTransaction = dbTransaction;
             OrderDetailRepository = orderDetailRepository;
             OrderMasterRepository = orderMasterRepository;
+            UserRepository = userRepository;
         }
         public void Commit()
         {
@@ -63,30 +62,7 @@ namespace DataLayer.Infrastructure
         }
         
 
-        public string AuthKey()
-        {
-           
-            string authKey = _dbContext.AuthKey();
-            return authKey;
-        }
-
-        public string MongoConString()
-        {
-            string con = _dbContext.MongoConString();
-            return con;
-        }
-
-        public string MongoDbName()
-        {
-            string con = _dbContext.MongoDbName();
-            return con;
-        }
-
-        public string MongoOrderCollection()
-        {
-            string con = _dbContext.MongoOrderCollection();
-            return con;
-        }
+      
 
        
         #endregion

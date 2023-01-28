@@ -14,6 +14,7 @@ namespace BusinessLayer
         public long UserLocation { get; set; }
         public string Name { get; set; }
         public  long RoleId { get; set; }
+        public string Email { get; set; }
 
     }
 }

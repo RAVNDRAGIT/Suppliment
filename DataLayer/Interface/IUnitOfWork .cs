@@ -8,13 +8,11 @@ namespace DataLayer.Interface
 {
     public interface IUnitOfWork : IDisposable
     {
-        string AuthKey();
-        string MongoConString();
-        string MongoDbName();
-        string MongoOrderCollection();
+       
         void Commit();
         IOrderDetailRepository OrderDetailRepository { get; }
         IOrderMasterRepository OrderMasterRepository { get; }
+        IUserRepository UserRepository { get; }
         //void BeginTrans();
     }
 }

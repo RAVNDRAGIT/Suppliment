@@ -20,6 +20,7 @@ using ServiceLayer.Carts;
 using ServiceLayer.File;
 using ServiceLayer.Helper;
 using ServiceLayer.Order;
+using ServiceLayer.Payment;
 using ServiceLayer.Product;
 using System.Data;
 using System.Security.Cryptography.Xml;
@@ -49,9 +50,12 @@ builder.Services.AddScoped< OrderService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped< WhatsAppHelper>();
 builder.Services.AddScoped<MongoHelper>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, Microsoft.AspNetCore.Http.HttpContextAccessor>();
 builder.Services.Configure<MongoDbDC>(
     builder.Configuration.GetSection("Order"));
+builder.Services.Configure<MongoDbDC>(
+    builder.Configuration.GetSection("OrderPayment"));
 builder.Services.AddScoped<CartService>();
 builder.Services.AddControllers();
 

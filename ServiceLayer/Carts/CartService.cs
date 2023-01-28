@@ -169,8 +169,78 @@ namespace ServiceLayer.Carts
 
 
 
-        public async Task UpdateAsync(string id, Cart updatedBook) =>
-            await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == id, updatedBook);
+        public async Task<string> AssignCartAsync(AssignCartDC assignCartDC)
+        {
+
+            Cart existingcartuser = new Cart();
+            var currentcart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == assignCartDC.CookieValue).FirstOrDefaultAsync();
+
+            if (userid != null && userid.HasValue)
+            {
+                existingcartuser = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
+                if (existingcartuser != null)
+                {
+                    List<CartDetails> listcartDetails = new List<CartDetails>();
+                    Cart cart = new Cart();
+                    foreach (var cartitem in existingcartuser.cartDetails)
+                    {
+                        var data = await _productMasterRepository.GetProduct(cartitem.ProductId);
+                        if (data != null)
+                        {
+                            CartDetails cartDetails = Mapper.Map(data).ToANew<CartDetails>();
+
+                            var existingproduct = existingcartuser.cartDetails.Where(x => x.ProductId == cartitem.ProductId).FirstOrDefault();
+                            if (existingproduct != null)
+                            {
+                                cartDetails.TotalMrp = data.Mrp * cartitem.Quantity;
+                                cartDetails.TotalPrice = data.Price * cartitem.Quantity;
+                                cartDetails.TotalDiscount = cartDetails.Quantity * cartDetails.Discount;
+                            }
+                            else
+                            {
+                                cartDetails.TotalMrp = data.Mrp * existingproduct.Quantity;
+                                cartDetails.TotalPrice = data.Price * existingproduct.Quantity;
+                                cartDetails.TotalDiscount = existingproduct.Quantity * existingproduct.Discount;
+                            }
+
+
+                            cartDetails.ProductId = cartitem.ProductId;
+                            cartDetails.Created_By = userid;
+                            cartDetails.Updated_By = userid;
+                            cartDetails.Created_Date = DateTime.Now;
+                            cartDetails.Updated_Date = DateTime.Now;
+                            cartDetails.Quantity = cartitem.Quantity;
+                            listcartDetails.Add(cartDetails);
+
+                        }
+                        cart.cartDetails = listcartDetails;
+                        cart.TotalMrp = listcartDetails.Sum(X => X.TotalMrp);
+                        cart.TotalDiscount = listcartDetails.Sum(X => X.TotalDiscount);
+                        cart.TotalPrice = listcartDetails.Sum(X => X.TotalPrice);
+                        cart.Updated_By = userid;
+                        cart.Updated_Date = DateTime.Now;
+
+                        await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == assignCartDC.MongoId, cart, new UpdateOptions { IsUpsert = true });
+                        return existingcartuser.Id;
+                    }
+
+                }
+                else
+                {
+                    currentcart.Created_By = userid;
+                    currentcart.Updated_By = userid;
+                    currentcart.Updated_Date = DateTime.Now;
+                    await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == assignCartDC.MongoId, currentcart, new UpdateOptions { IsUpsert = true });
+                    return currentcart.Id;
+                }
+
+            }
+            else
+            {
+                return null;
+            }
+            return null;
+        }
 
         public async Task<bool> RemoveAsync(string cookievalue)
         {
@@ -196,6 +266,8 @@ namespace ServiceLayer.Carts
             }
 
         }
+
+      
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BusinessLayer;
 using BusinessLayer.ProductMaster;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using DataContract;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
@@ -50,6 +51,10 @@ namespace DataLayer.Repository.Auth
           
         }
 
-        
+        public async Task< User> GetUser(long userid)
+        {
+            var data = await _sqlConnection.GetAsync<User>(userid, _transaction);
+            return data;
+        }
     }
 }
