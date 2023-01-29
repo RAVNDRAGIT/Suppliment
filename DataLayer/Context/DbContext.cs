@@ -87,6 +87,52 @@ namespace DataLayer.Context
             string url = _configuration.GetSection("PaymentIntegration").GetSection("api-version").Value;
             return url;
         }
+
+        public string GetDeliveryBaseUrl()
+        {
+            string url = _configuration.GetSection("DeliveryIntegration").GetSection("base_url").Value;
+            return url;
+        }
+
+        public string GetDeliveryemail()
+        {
+            string url = _configuration.GetSection("DeliveryIntegration").GetSection("email").Value;
+            return url;
+        }
+
+        public string GetDeliverypassword()
+        {
+            string url = _configuration.GetSection("DeliveryIntegration").GetSection("password").Value;
+            return url;
+        }
+
+        public string GetWhatsAppToken()
+        {
+            string token = _configuration.GetSection("WhatsappIntegration").GetSection("token").Value;
+            return token;
+        }
+        public string GetWhatsAppUrl()
+        {
+            string url = _configuration.GetSection("WhatsappIntegration").GetSection("url").Value;
+            return url;
+        }
+        public string GetWhatsAppBusinessAccountId()
+        {
+            string businessaccid = _configuration.GetSection("WhatsappIntegration").GetSection("WhatsAppBusinessAccID").Value;
+            return businessaccid;
+        }
+
+        public string GetWhatsAppBusinessPhoneNumberId()
+        {
+            string businesphonenumberid = _configuration.GetSection("WhatsappIntegration").GetSection("WhatsAppBusinessPhoneNumberId").Value;
+            return businesphonenumberid;
+        }
+
+        public string GetWhatsAppBusinessId()
+        {
+            string businessid = _configuration.GetSection("WhatsappIntegration").GetSection("WhatsAppBusinessId").Value;
+            return businessid;
+        }
         private void ResetRepositories()
         {
 

@@ -23,7 +23,7 @@ namespace DataLayer.Repository.Address
             _dbTransaction = dbTransaction;
             _sqlConnection = sqlConnection;
         }
-        public async Task<long> SubmitUserLocation(UserLocations userLocations, long userid)
+        public async Task<long> SubmitUserLocation(UserLocation userLocations, long userid)
         {
             userLocations.Created_By = userid;
             userLocations.Created_Date = DateTime.Now;
@@ -32,8 +32,14 @@ namespace DataLayer.Repository.Address
             userLocations.IsActive = true;
             userLocations.IsDelete = false;
 
-            var data = await _sqlConnection.InsertAsync<UserLocations>(userLocations, _transaction);
+            var data = await _sqlConnection.InsertAsync<UserLocation>(userLocations, _transaction);
                 return data;
+        }
+
+        public async Task<UserLocation> GetById(long id)
+        {
+           var data = await _sqlConnection.GetAsync<UserLocation>(id,_transaction);
+            return data;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace ServiceLayer.Address
 
         public async Task<long> SubmitUserLocation(UserLocationDC userLocationDC)
         {
-            var data = Mapper.Map(userLocationDC).ToANew<UserLocations>();
+            var data = Mapper.Map(userLocationDC).ToANew<UserLocation>();
             long userid = jwtMiddleware.GetUserId()??0;
             long res = await _unitOfWork.UserLocationRepository.SubmitUserLocation(data, userid);
             return res;

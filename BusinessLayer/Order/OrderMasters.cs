@@ -14,5 +14,7 @@ namespace BusinessLayer.Order
         public bool IsPaid { get; set; }
         public int Status { get; set; }
         public long UserLocationId { get; set; }
+        public bool? IsDelievered { get; set; }
+        public string DeliveryToken { get; set; }
     }
 }

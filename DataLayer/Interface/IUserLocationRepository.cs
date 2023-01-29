@@ -9,6 +9,7 @@ namespace DataLayer.Interface
 {
     public interface IUserLocationRepository
     {
-        Task<long> SubmitUserLocation(UserLocations userLocations,long userid);
+        Task<long> SubmitUserLocation(UserLocation userLocations,long userid);
+        Task<UserLocation> GetById(long id);
     }
 }

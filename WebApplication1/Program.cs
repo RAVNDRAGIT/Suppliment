@@ -19,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using ServiceLayer.Address;
 using ServiceLayer.Auth;
 using ServiceLayer.Carts;
+using ServiceLayer.Delivery;
 using ServiceLayer.File;
 using ServiceLayer.Helper;
 using ServiceLayer.Order;
@@ -27,6 +28,8 @@ using ServiceLayer.Product;
 using System.Data;
 using System.Security.Cryptography.Xml;
 using System.Text;
+using WhatsappBusiness.CloudApi.Configurations;
+using WhatsappBusiness.CloudApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +66,14 @@ builder.Services.Configure<MongoDbDC>(
 builder.Services.Configure<MongoDbDC>(
     builder.Configuration.GetSection("OrderPayment"));
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<DeliveryService>();
+builder.Services.AddScoped<WhatsAppHelper>();
+WhatsAppBusinessCloudApiConfig whatsAppConfig = new WhatsAppBusinessCloudApiConfig();
+whatsAppConfig.WhatsAppBusinessPhoneNumberId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessPhoneNumberId"];
+whatsAppConfig.WhatsAppBusinessAccountId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessAccountId"];
+whatsAppConfig.WhatsAppBusinessId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessId"];
+whatsAppConfig.AccessToken = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["AccessToken"];
+builder.Services.AddWhatsAppBusinessCloudApiService(whatsAppConfig);
 builder.Services.AddControllers();
 
 var key = builder.Configuration.GetSection("Key").GetSection("userKey").Value;

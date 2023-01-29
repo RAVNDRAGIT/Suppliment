@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLayer
 {
-    public class UserLocations:BaseModel
+    public class UserLocation:BaseModel
     {
         public string Name { get; set; }
         public string Mobile { get; set; }

@@ -42,7 +42,15 @@ namespace DataLayer.Repository.Order
             
         }
 
-       
+       public async Task<long> UpdateDeliveryToken(long orderid,long userid,string token)
+        {
+            DynamicParameters dbArgs = new DynamicParameters();
+            dbArgs.Add(name: "@token", value: token);
+            dbArgs.Add(name: "@updateby", value: userid);
+            dbArgs.Add(name: "@orderid", value: orderid);
+            var res = await _sqlConnection.ExecuteAsync("[dbo].[UpdateDeliverytoken]", param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure);
+            return res;
+        }
 
         public async Task<long> UpdateOrderStock(List<ProductQuantityDC> productQuantities,long userid)
         {
