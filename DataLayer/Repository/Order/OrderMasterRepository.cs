@@ -1,7 +1,7 @@
 ﻿using BusinessLayer.Order;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using DataContract;
+using DataContract.Product;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;

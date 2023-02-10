@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataContract
+namespace DataContract.Product
 {
     public class ProductMasterDC
     {

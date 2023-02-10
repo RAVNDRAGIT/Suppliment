@@ -1,4 +1,4 @@
-﻿using DataContract;
+﻿using DataContract.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +19,10 @@ namespace Suppliment.API.Controllers.User
         [HttpPost]
         public IActionResult Authentication(UserCredentialDC logincredentail)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var result = _authService.Token(logincredentail);
 
             if (result==null)

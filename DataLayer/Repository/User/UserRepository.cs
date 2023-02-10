@@ -2,7 +2,7 @@
 using BusinessLayer.ProductMaster;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using DataContract;
+using DataContract.Auth;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -21,7 +21,6 @@ namespace DataLayer.Repository.Auth
 {
     public class UserRepository : GenericRepository<User> ,IUserRepository
     {
-
         private SqlConnection _sqlConnection;
 
         private IDbTransaction _dbTransaction;
@@ -31,6 +30,9 @@ namespace DataLayer.Repository.Auth
             _dbTransaction = dbTransaction;
             _sqlConnection = sqlConnection;
         }
+
+       
+
         public ValidUserDetailDC Authentication(User user)
         {
             DynamicParameters dbArgs = new DynamicParameters();
@@ -55,6 +57,58 @@ namespace DataLayer.Repository.Auth
         {
             var data = await _sqlConnection.GetAsync<User>(userid, _transaction);
             return data;
+        }
+
+        public async Task<long> SubmitUser(User user)
+        {
+            try
+            {
+                user.IsActive = true;
+                user.IsDelete = false;
+                user.Created_By = 0;
+                user.Created_Date = DateTime.Now;
+                user.Updated_By = 0;
+                user.Updated_Date = DateTime.Now;
+                var result = await _sqlConnection.InsertAsync<User>(user, _transaction);
+                return result;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> CheckUserExist(string username)
+        {
+            DynamicParameters dbArgs = new DynamicParameters();
+            dbArgs.Add(name: "@Username", value: username);
+           
+
+            var data = (await _sqlConnection.QueryAsync<bool>("CheckExistsUser", param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+
+            return data;
+
+
+        }
+
+        public async Task<ValidUserDetailDC> GetUserDetailbyusername(string username)
+        {
+            DynamicParameters dbArgs = new DynamicParameters();
+            dbArgs.Add(name: "@Username", value: username);
+           
+            var data = (await _sqlConnection.QueryAsync<ValidUserDetailDC>("GetDetailsByUserName", param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+
+            if (data == null)
+            {
+                return null;
+            }
+            else
+            {
+                return data;
+
+            }
+
+
         }
     }
 }

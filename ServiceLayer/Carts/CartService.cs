@@ -2,6 +2,7 @@
 using BusinessLayer;
 using BusinessLayer.Order;
 using DataContract;
+using DataContract.Cart;
 using DataLayer.Context;
 using DataLayer.Interface;
 using Microsoft.Extensions.Options;
@@ -32,7 +33,7 @@ namespace ServiceLayer.Carts
             _unitofWork = unitOfWork;
             _mongoHelper = mongoHelper;
             _jwtMiddleware = jwtMiddleware;
-            userid = _jwtMiddleware.GetUserId();
+
             _productMasterRepository = productMasterRepository;
         }
 
@@ -41,6 +42,7 @@ namespace ServiceLayer.Carts
 
         public async Task<Cart?> GetAsync(string cookievalue)
         {
+            userid = _jwtMiddleware.GetUserId();
             Cart existscart = new Cart();
             if (userid != null && userid.HasValue)
             {
@@ -58,6 +60,7 @@ namespace ServiceLayer.Carts
         public async Task<string> CreateAsync(CartDetailDC cartDetailDC)
         {
             Cart existscart = new Cart();
+            userid = _jwtMiddleware.GetUserId();
             if (userid != null && userid.HasValue)
             {
                 existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
@@ -173,9 +176,10 @@ namespace ServiceLayer.Carts
         {
 
             Cart existingcartuser = new Cart();
+            userid = _jwtMiddleware.GetUserId();
             var currentcart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == assignCartDC.CookieValue).FirstOrDefaultAsync();
 
-            if (userid != null && userid.HasValue && currentcart!=null)
+            if (userid != null && userid.HasValue && currentcart != null)
             {
                 existingcartuser = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
                 if (existingcartuser != null)
@@ -245,6 +249,7 @@ namespace ServiceLayer.Carts
         public async Task<bool> RemoveAsync(string cookievalue)
         {
             Cart existscart = new Cart();
+            userid = _jwtMiddleware.GetUserId();
             if (userid != null && userid.HasValue)
             {
                 existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
@@ -267,7 +272,40 @@ namespace ServiceLayer.Carts
 
         }
 
-      
+        public async Task<bool> Removeitem(RemoveItemDC removeItemDC)
+        {
+            bool finalresult = false;
+            Cart existscart = new Cart();
+            var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
+                                                f => f.ProductId == removeItemDC.productid);
+            var result = _mongoHelper.OrderCollection()
+                .FindOneAndDeleteAsync(p => p.Id == removeItemDC.mongoid).Result;
+            userid = _jwtMiddleware.GetUserId();
+            if (userid != null && userid.HasValue)
+            {
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid).FirstOrDefaultAsync();
+
+            }
+            else
+            {
+                existscart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == removeItemDC.cookievalue).FirstOrDefaultAsync();
+
+            }
+            if (existscart != null && existscart.cartDetails.Count <= 1)
+            {
+                var res = await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == existscart.Id);
+                if (res.IsAcknowledged)
+                {
+                    finalresult= true;
+                }
+                else
+                {
+                    finalresult= false;
+                }
+            }
+
+            return finalresult;
+        }
 
     }
 }

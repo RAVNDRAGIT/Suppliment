@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.ProductMaster;
+using DataContract.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace DataLayer.Interface
 {
     public interface IProductMasterRepository
     {
-       Task<bool> AddProduct(ProductMaster productMaster);
+       Task<bool> AddProduct(ProductMaster productMaster,long userid);
         Task<ProductMaster> GetProduct(long id);
+        Task<List<ProductMaster>> GetProductDynamically(ProductFilterDC productFilterDC);
     }
 }

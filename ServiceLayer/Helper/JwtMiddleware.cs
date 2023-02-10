@@ -1,5 +1,5 @@
 ﻿using BusinessLayer;
-using DataContract;
+using DataContract.Auth;
 using DataLayer.Context;
 using DataLayer.Interface;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -108,5 +108,7 @@ namespace ServiceLayer.Helper
 
 
         }
+
+       
     }
 }

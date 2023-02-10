@@ -6,10 +6,12 @@ using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using DataLayer.Repository.Address;
 using DataLayer.Repository.Auth;
+using DataLayer.Repository.Home;
 using DataLayer.Repository.Order;
 using DataLayer.Repository.Product;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +24,7 @@ using ServiceLayer.Carts;
 using ServiceLayer.Delivery;
 using ServiceLayer.File;
 using ServiceLayer.Helper;
+using ServiceLayer.Home;
 using ServiceLayer.Order;
 using ServiceLayer.Payment;
 using ServiceLayer.Product;
@@ -68,6 +71,11 @@ builder.Services.Configure<MongoDbDC>(
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<DeliveryService>();
 builder.Services.AddScoped<WhatsAppHelper>();
+builder.Services.AddScoped<IGoalRepository,GoalRepository>();
+builder.Services.AddScoped<GoalService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<GoogleService>();
 WhatsAppBusinessCloudApiConfig whatsAppConfig = new WhatsAppBusinessCloudApiConfig();
 whatsAppConfig.WhatsAppBusinessPhoneNumberId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessPhoneNumberId"];
 whatsAppConfig.WhatsAppBusinessAccountId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessAccountId"];
@@ -92,7 +100,9 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key))
     };
+
 });
+
 //builder.Services.AddSingleton<IUser,UserRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -143,7 +153,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -160,6 +170,7 @@ app.UseStaticFiles(new StaticFileOptions()
 
 // Shows UseCors with named policy.
 app.UseCors("MyPolicy");
+
 app.UseAuthorization();
 
 app.MapControllers();

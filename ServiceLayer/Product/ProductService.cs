@@ -1,8 +1,9 @@
 ﻿using AgileObjects.AgileMapper;
 using BusinessLayer.ProductMaster;
-using DataContract;
+using DataContract.Product;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
+using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +13,25 @@ using System.Threading.Tasks;
 namespace ServiceLayer.Product
 {
 
-    public class ProductService 
+    public class ProductService
     {
-        public IUnitOfWork _unitOfWork;
-        public IProductMasterRepository _productMasterRepository;
-        public ProductService(IUnitOfWork unitOfWork, IProductMasterRepository productMasterRepository)
+        private IUnitOfWork _unitOfWork;
+        private IProductMasterRepository _productMasterRepository;
+        private JwtMiddleware _jwtMiddleware;
+        public ProductService(IUnitOfWork unitOfWork, IProductMasterRepository productMasterRepository, JwtMiddleware JwtMiddleware)
         {
             _unitOfWork = unitOfWork;
-            _productMasterRepository=productMasterRepository;
+            _productMasterRepository = productMasterRepository;
+            _jwtMiddleware = JwtMiddleware;
         }
         public async Task<bool> AddProduct(ProductMasterDC productMasterDC)
         {
             bool result = false;
+            long userid = _jwtMiddleware.GetUserId() ?? 0;
             if (productMasterDC != null)
             {
                 var productMaster = Mapper.Map(productMasterDC).ToANew<ProductMaster>();
-                bool res = await _productMasterRepository.AddProduct(productMaster);
+                bool res = await _productMasterRepository.AddProduct(productMaster, userid);
                 if (res)
                 {
 
@@ -36,6 +40,13 @@ namespace ServiceLayer.Product
                 result = res;
             }
             return result;
+        }
+
+        public async Task<List<ProductMaster>> GetProductDynamically(ProductFilterDC productFilterDC)
+
+        {
+            var data = await _productMasterRepository.GetProductDynamically(productFilterDC);
+            return data;
         }
     }
 }

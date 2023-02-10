@@ -1,7 +1,7 @@
 ﻿
 using BusinessLayer.Order;
-using DataContract;
 using DataContract.Payment;
+using DataContract.Product;
 using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;

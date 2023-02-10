@@ -15,15 +15,15 @@ namespace DataLayer.Context
     public class DbContext
     {
         private readonly IConfiguration _configuration;
-        
+
 
         public DbContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            
+
 
         }
-        
+
         public string AuthKey()
         {
             string _authKey = _configuration.GetSection("Key").GetSection("userKey").Value;
@@ -54,7 +54,7 @@ namespace DataLayer.Context
             return con;
         }
 
-       public string GetNotifyUrl()
+        public string GetNotifyUrl()
         {
             string url = _configuration.GetSection("PaymentIntegration").GetSection("notify_url").Value;
             return url;
@@ -133,13 +133,28 @@ namespace DataLayer.Context
             string businessid = _configuration.GetSection("WhatsappIntegration").GetSection("WhatsAppBusinessId").Value;
             return businessid;
         }
-        private void ResetRepositories()
+        public string GetGoogleClientId()
         {
+            string clientid = _configuration.GetSection("GoogleIntegration").GetSection("clientid").Value;
+            return clientid;
+        }
+
+        public string GetSqlConnection()
+        {
+            string conn = _configuration.GetSection("ConnectionStrings").GetSection("SqlConnection").Value;
+            return conn;
+        }
+        public IDbConnection CreateConnection()
+        {
+            //_connection = new SqlConnection();
+
+            string constr = GetSqlConnection();
+            //_connection.ConnectionString = constr;
+            return new SqlConnection(constr);
+            //return _dbContext.CreateConnection();
 
         }
 
-        
-        
     }
 }
 

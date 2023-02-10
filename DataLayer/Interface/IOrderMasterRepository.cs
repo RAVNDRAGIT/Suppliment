@@ -1,5 +1,5 @@
 ﻿using BusinessLayer.Order;
-using DataContract;
+using DataContract.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;

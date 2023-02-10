@@ -18,9 +18,9 @@ namespace DataLayer.Infrastructure
 {
     public class UnitOfWork : IUnitOfWork
     {
-      
-       
 
+
+        private readonly string _connectionString;
         IDbTransaction _dbTransaction;
         #region Configuration
         public IOrderDetailRepository OrderDetailRepository
@@ -40,6 +40,7 @@ namespace DataLayer.Infrastructure
             OrderMasterRepository = orderMasterRepository;
             UserRepository = userRepository;
             UserLocationRepository = userLocationRepository;
+
         }
         public void Commit()
         {
@@ -55,13 +56,16 @@ namespace DataLayer.Infrastructure
             }
            
         }
+
+        public IDbConnection CreateConnection()
+      => new SqlConnection(_connectionString);
         public void Dispose()
         {
             _dbTransaction.Connection?.Close();
             _dbTransaction.Connection?.Dispose();
             _dbTransaction.Dispose();
-            
-           
+
+
         }
         
 

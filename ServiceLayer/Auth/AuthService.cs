@@ -1,7 +1,7 @@
 ﻿using AgileObjects.AgileMapper;
 using BusinessLayer;
 using BusinessLayer.ProductMaster;
-using DataContract;
+using DataContract.Auth;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using ServiceLayer.Helper;

@@ -28,7 +28,10 @@ namespace DataLayer.Infrastructure
         public GenericRepository(SqlConnection sqlConnection, IDbTransaction transaction)
         {
             _transaction = transaction;
-            _connection = sqlConnection;
+            
+                _connection = sqlConnection;
+            
+            
         }
         //protected GenericRepository(DbContext context)
         //{
