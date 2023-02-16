@@ -70,14 +70,16 @@ namespace ServiceLayer.Payment
                 {
                     orderAmount = orderdata.TotalPrice;
                 }
-                var customerdata = await _unitOfWork.UserRepository.GetUser(orderdata.Created_By);
+                var basecustomerdata = await _unitOfWork.UserRepository.GetUser(orderdata.Created_By);
+
+                var customerdata = await _unitOfWork.UserLocationRepository.GetById(orderdata.UserLocationId);
                 string customeremailid = null;
                 string customerid = null;
                 string customerphone = null;
                 if (customerdata != null)
                 {
-                     customeremailid = customerdata.Email;
-                     customerid = Convert.ToString(customerdata.Id);
+                     customeremailid = basecustomerdata.Email;
+                     customerid = Convert.ToString(basecustomerdata.Id);
                      customerphone = customerdata.Mobile;
                 }
 

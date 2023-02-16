@@ -1,4 +1,6 @@
 ﻿using DataContract.Address;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Address;
@@ -8,9 +10,10 @@ namespace Suppliment.API.Controllers.Location
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserLocationController : ControllerBase
     {
-        public UserLocationService _userLocationService;
+        private readonly  UserLocationService _userLocationService;
         public UserLocationController(UserLocationService userLocationService)
         {
             _userLocationService = userLocationService;
@@ -22,5 +25,13 @@ namespace Suppliment.API.Controllers.Location
             var data = await _userLocationService.SubmitUserLocation(userLocationDC);
             return Ok(data);
         }
+
+         [HttpGet]
+        public async Task<IActionResult> GetUserAddressbyuserId()
+        {
+            var data = await _userLocationService.GetUserAddressbyUserid();
+            return Ok(data);
+        }
+
     }
 }

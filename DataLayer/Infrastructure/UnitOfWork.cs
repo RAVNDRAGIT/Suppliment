@@ -32,7 +32,9 @@ namespace DataLayer.Infrastructure
 
         public IUserLocationRepository UserLocationRepository { get; }
 
-        public UnitOfWork( IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository,IUserLocationRepository userLocationRepository)
+        public IProductTypeRepository ProductTypeRepository { get; }
+        public IProductMasterRepository ProductMasterRepository { get; }
+        public UnitOfWork( IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository,IUserLocationRepository userLocationRepository,IProductTypeRepository productTypeRepository,IProductMasterRepository productMasterRepository)
         {
            
             _dbTransaction = dbTransaction;
@@ -40,6 +42,8 @@ namespace DataLayer.Infrastructure
             OrderMasterRepository = orderMasterRepository;
             UserRepository = userRepository;
             UserLocationRepository = userLocationRepository;
+            ProductTypeRepository = productTypeRepository;
+            ProductMasterRepository = productMasterRepository;
 
         }
         public void Commit()

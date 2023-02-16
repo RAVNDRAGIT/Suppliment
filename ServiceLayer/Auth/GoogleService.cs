@@ -1,6 +1,7 @@
-﻿using BusinessLayer;
+﻿using BusinessLayer.Users;
 using DataContract.Auth;
 using DataLayer.Context;
+using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using DataLayer.Repository.Auth;
 using Google.Apis.Auth;
@@ -18,18 +19,19 @@ namespace ServiceLayer.Auth
         private readonly DbContext _dbContext;
         public IUnitOfWork _unitOfWork;
         private readonly JwtMiddleware _jwtMiddleware;
-        private readonly UserRepository _userRepository;
+      
 
-        public GoogleService(DbContext dbContext, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware, UserRepository userRepository)
+        public GoogleService(DbContext dbContext, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware)
         {
             _dbContext = dbContext;
-        
+            _unitOfWork = unitOfWork;
             _jwtMiddleware = jwtMiddleware;
-            _userRepository = userRepository;
+           
         }
-        public async Task<string> ValidateGoogleToken(GooglePayloadDc googlePayloadDc)
+        public async Task<ValidUserDetailDC> ValidateGoogleToken(GooglePayloadDc googlePayloadDc)
         {
             string validtoken = null;
+            ValidUserDetailDC validuserdetails = new ValidUserDetailDC();
             GoogleJsonWebSignature.ValidationSettings settings = new GoogleJsonWebSignature.ValidationSettings();
 
             string clientid = _dbContext.GetGoogleClientId();
@@ -45,6 +47,12 @@ namespace ServiceLayer.Auth
                 if (data != null)
                 {
                     validtoken = _jwtMiddleware.GenerateToken(data);
+                     validuserdetails = await _unitOfWork.UserRepository.GetUserDetailbyusername(payload.Email);
+                    if (validuserdetails != null)
+                    {
+                        validtoken = _jwtMiddleware.GenerateToken(validuserdetails);
+                        validuserdetails.Token = validtoken;
+                    }
                 }
             }
 
@@ -59,19 +67,21 @@ namespace ServiceLayer.Auth
 
                 };
 
-                long res =await _unitOfWork.UserRepository.SubmitUser(user);
-                if (res>0)
+                long res = await  _unitOfWork.UserRepository.SubmitUser(user);
+                if (res > 0)
                 {
-                    //_unitOfWork.Commit();
-                    var data = await _unitOfWork.UserRepository.GetUserDetailbyusername(payload.Email);
-                    if (data != null)
+                    _unitOfWork.Commit();
+                     validuserdetails = await _unitOfWork.UserRepository.GetUserDetailbyusername(payload.Email);
+                    if (validuserdetails != null)
                     {
-                        validtoken = _jwtMiddleware.GenerateToken(data);
+                        validtoken = _jwtMiddleware.GenerateToken(validuserdetails);
+                        validuserdetails.Token = validtoken;
                     }
+
                 }
             }
-
-            return validtoken;
+            
+            return validuserdetails;
             //return Ok(new { AuthToken = _jwtGenerator.CreateUserAuthToken(payload.Email) });
         }
     }

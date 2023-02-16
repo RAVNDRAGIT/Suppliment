@@ -10,5 +10,6 @@ namespace DataContract.Order
     {
         public string MongoId { get; set; }
         public long UserLocationId { get; set; }
+        public string PaymentType { get; set; }
     }
 }

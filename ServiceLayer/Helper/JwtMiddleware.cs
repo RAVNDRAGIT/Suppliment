@@ -1,4 +1,5 @@
 ﻿using BusinessLayer;
+using DataContract;
 using DataContract.Auth;
 using DataLayer.Context;
 using DataLayer.Interface;
@@ -11,49 +12,67 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+
 using System.Threading.Tasks;
 
 namespace ServiceLayer.Helper
 {
-    public class JwtMiddleware 
+    public class JwtMiddleware
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         //private readonly DbContext _dbContext;
-        private readonly DbContext  _dbContext;
+        private readonly DbContext _dbContext;
         public JwtMiddleware(IHttpContextAccessor httpContextAccessor, DbContext dbContext)
         {
             _httpContextAccessor = httpContextAccessor;
             _dbContext = dbContext;
         }
-        public JwtSecurityToken JwtToken()
+        public ResultViewModel<JwtSecurityToken> JwtToken()
         {
 
 
-
+            ResultViewModel<JwtSecurityToken> result = new ResultViewModel<JwtSecurityToken>();
             var tokenHandler = new JwtSecurityTokenHandler();
             var secretkey = _dbContext.AuthKey();
             var key = Encoding.ASCII.GetBytes(secretkey);
             var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", string.Empty);
-
-            if (Convert.ToString( token)!=null && token!="" && token!="null")
+            JwtSecurityToken jwtSecurityToken;
+            if (Convert.ToString(token) != null && token != "" && token != "null")
             {
-                tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                jwtSecurityToken = new JwtSecurityToken(token);
+                if (jwtSecurityToken.ValidTo > DateTime.UtcNow)
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                return jwtToken;
+
+                    tokenHandler.ValidateToken(token, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ClockSkew = TimeSpan.Zero
+
+                    }, out SecurityToken validatedToken);
+                    var jwtToken = (JwtSecurityToken)validatedToken;
+                    result.IsSucess = true;
+                    result.response = jwtToken;
+                    return result;
+                }
+                else
+                {
+                    result.IsError = true;
+                    result.ErrorMessage = "Token Expired";
+                }
+
             }
             else
             {
-                return null;
+                result.IsSucess = true;
+                result.SuccessMessage = null;
             }
-
+            return result;
         }
+
+
 
         public string GenerateToken(ValidUserDetailDC validUserDetailDC)
         {
@@ -61,7 +80,7 @@ namespace ServiceLayer.Helper
             var tokenHandler = new JwtSecurityTokenHandler();
 
             // 2. Create Private Key to Encrypted
-            var tokenKey = Encoding.ASCII.GetBytes(_dbContext.AuthKey());
+            var tokenKey =  Encoding.ASCII.GetBytes( _dbContext.AuthKey());
 
             //3. Create JETdescriptor
             var tokenDescriptor = new SecurityTokenDescriptor()
@@ -88,17 +107,25 @@ namespace ServiceLayer.Helper
         public string GetUserName()
         {
             var jwtToken = JwtToken();
-            var username = jwtToken.Claims.First(x => x.Type == "UserName").Value;
-            return username;
+            if(jwtToken.IsSucess==true)
+            {
+                var username = jwtToken.response.Claims.First(x => x.Type == "UserName").Value;
+                return username;
+            }
+           else
+            {
+                return null;
+
+            }
 
         }
 
         public long? GetUserId()
         {
             var jwtToken = JwtToken();
-            if (jwtToken != null)
+            if (jwtToken.IsSucess == true && jwtToken.response!=null)
             {
-                var userid = int.Parse(jwtToken.Claims.First(x => x.Type == "UserId").Value);
+                var userid = int.Parse(jwtToken.response.Claims.First(x => x.Type == "UserId").Value);
                 return userid;
             }
             else

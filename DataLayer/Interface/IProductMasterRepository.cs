@@ -1,4 +1,4 @@
-﻿using BusinessLayer.ProductMaster;
+﻿using BusinessLayer.Product;
 using DataContract.Product;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,11 @@ namespace DataLayer.Interface
     {
        Task<bool> AddProduct(ProductMaster productMaster,long userid);
         Task<ProductMaster> GetProduct(long id);
-        Task<List<ProductMaster>> GetProductDynamically(ProductFilterDC productFilterDC);
+        Task<List<DynamicProductDC>> GetProductDynamically(ProductFilterDC productFilterDC);
+
+        Task<List<DynamicProductDC>> GetLikeProduct(long producttypeid,long productid);
+
+        Task<int> GetWeight(List<ProductQuantityDC> productQuantities);
+        
     }
 }

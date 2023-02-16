@@ -1,4 +1,5 @@
 ﻿using DataContract.Cart;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace Suppliment.API.Controllers.Order
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
-    //[Authorize(Roles ="User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AssignCart : ControllerBase
     {
         public CartService _cartService;

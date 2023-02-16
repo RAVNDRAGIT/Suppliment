@@ -14,6 +14,8 @@ namespace DataLayer.Interface
         IOrderMasterRepository OrderMasterRepository { get; }
         IUserRepository UserRepository { get; }
         IUserLocationRepository UserLocationRepository { get; }
+        IProductTypeRepository ProductTypeRepository { get; }
+        IProductMasterRepository ProductMasterRepository { get; }
         //void BeginTrans();
     }
 }

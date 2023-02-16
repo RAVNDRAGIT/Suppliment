@@ -1,4 +1,5 @@
-﻿using BusinessLayer.ProductMaster;
+﻿using BusinessLayer.Product;
+using BusinessLayer.Users;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using DataContract.Product;
@@ -40,13 +41,22 @@ namespace DataLayer.Repository.Product
             return false;
         }
 
+        public async Task<List<DynamicProductDC>> GetLikeProduct(long producttypeid, long productid)
+        {
+            var dbArgs = new DynamicParameters();
+            dbArgs.Add(name: "@producttypeid", value: producttypeid);
+            dbArgs.Add(name: "@productid", value: productid);
+            var data = (await _sqlConnection.QueryAsync<DynamicProductDC>("[dbo].[GetLikeProduct]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            return data.ToList();
+        }
+
         public async Task<ProductMaster> GetProduct(long id)
         {
             var data = await _sqlConnection.GetAsync<ProductMaster>(id,_transaction);
             return data;
         }
 
-        public async Task<List<ProductMaster>> GetProductDynamically(ProductFilterDC productFilterDC)
+        public async Task<List<DynamicProductDC>> GetProductDynamically(ProductFilterDC productFilterDC)
 
         {
             var dbArgs = new DynamicParameters();
@@ -54,10 +64,7 @@ namespace DataLayer.Repository.Product
             {
                 dbArgs.Add(name: "@productid", value: productFilterDC.productid);
             }
-            //else
-            //{
-            //    dbArgs.Add(name: "@productid", value:null);
-            //}
+            
 
             if(productFilterDC.productname != null)
             {
@@ -74,8 +81,45 @@ namespace DataLayer.Repository.Product
                 dbArgs.Add(name: "@take", value: productFilterDC.take);
             }
 
-            var data = (await _sqlConnection.QueryAsync<ProductMaster>("[dbo].[GetProductDynamically]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            if (productFilterDC.categoryid != null)
+            {
+                dbArgs.Add(name: "@categoryid", value: productFilterDC.categoryid);
+            }
+
+            if (productFilterDC.producttypeid != null)
+            {
+                dbArgs.Add(name: "@producttypeid", value: productFilterDC.producttypeid);
+            }
+
+            if (productFilterDC.goalid != null)
+            {
+                dbArgs.Add(name: "@goalid", value: productFilterDC.goalid);
+            }
+
+
+            var data = (await _sqlConnection.QueryAsync<DynamicProductDC>("[dbo].[GetProductDynamically]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
             return data.ToList();
+        }
+
+        public async Task<int> GetWeight(List<ProductQuantityDC> productQuantities)
+        {
+            DynamicParameters dbArgs = new DynamicParameters();
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ProductMasterId");
+            dt.Columns.Add("Quantity");
+            foreach (var data in productQuantities)
+            {
+                var dr = dt.NewRow();
+                dr["ProductMasterId"] = data.ProductMasterId;
+                dr["Quantity"] = data.Quantity;
+                dt.Rows.Add(dr);
+            }
+          
+            dbArgs.Add(name: "@PRODUCTQUANTITY", value: dt.AsTableValuedParameter("[dbo].[productQuantity]"));
+            var res = await _sqlConnection.QueryAsync<int>("[dbo].[GetProductWeight]", param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure);
+
+
+            return res.FirstOrDefault();
         }
     }
 }

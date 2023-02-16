@@ -1,5 +1,7 @@
-﻿using BusinessLayer;
+﻿using BusinessLayer.Users;
+using Dapper;
 using Dapper.Contrib.Extensions;
+using DataContract.Address;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using Microsoft.Data.SqlClient;
@@ -31,7 +33,7 @@ namespace DataLayer.Repository.Address
             userLocations.Updated_Date = DateTime.Now;
             userLocations.IsActive = true;
             userLocations.IsDelete = false;
-
+            userLocations.IsDefault = true;
             var data = await _sqlConnection.InsertAsync<UserLocation>(userLocations, _transaction);
                 return data;
         }
@@ -40,6 +42,16 @@ namespace DataLayer.Repository.Address
         {
            var data = await _sqlConnection.GetAsync<UserLocation>(id,_transaction);
             return data;
+        }
+
+        public async Task<List<UserLocationResultDC>> GetAddressbyUserId(long userid)
+        {
+            DynamicParameters dbargs = new DynamicParameters();
+            dbargs.Add(name: "@userid", value: userid);
+           
+
+            var data = (await _sqlConnection.QueryAsync<UserLocationResultDC>("GetAddressbyUserId", transaction: _transaction, param: dbargs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            return data.ToList();
         }
     }
 }

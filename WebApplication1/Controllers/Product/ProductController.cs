@@ -1,5 +1,4 @@
 ﻿using BusinessLayer;
-using BusinessLayer.ProductMaster;
 using DataContract.Product;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

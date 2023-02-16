@@ -1,4 +1,4 @@
-﻿using BusinessLayer.ProductMaster;
+﻿
 using DataContract.Product;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +21,13 @@ namespace Suppliment.API.Controllers.Product
         {
 
             var data = await _productMasterService.GetProductDynamically(productFilterDC);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLikeProduct(long producttypeid, long productid)
+        {
+            var data = await _productMasterService.GetLikeProduct(producttypeid, productid);
             return Ok(data);
         }
     }

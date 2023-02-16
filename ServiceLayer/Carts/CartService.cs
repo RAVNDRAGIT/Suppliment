@@ -71,19 +71,31 @@ namespace ServiceLayer.Carts
 
             }
 
-            if (existscart != null && cartDetailDC.Quantity == 0 && existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId) && existscart.cartDetails.Count > 1)
+            if (existscart != null && cartDetailDC.Quantity <= 0)
             {
-                var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
-                                                f => f.ProductId == cartDetailDC.ProductId);
-                var result = _mongoHelper.OrderCollection()
-                    .FindOneAndUpdateAsync(p => p.Id == existscart.Id, update).Result;
-                return result.Id;
+                if (existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId) && existscart.cartDetails.Count > 1)
+                {
+                    var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
+                                                    f => f.ProductId == cartDetailDC.ProductId);
+                    var result = _mongoHelper.OrderCollection()
+                        .FindOneAndUpdateAsync(p => p.Id == existscart.Id, update).Result;
+                    return result.Id;
+                }
+                else
+                {
+                    await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == existscart.Id);
+                    return null;
+                }
+                
             }
-            else if (existscart != null && cartDetailDC.Quantity == 0 && existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId) && existscart.cartDetails.Count == 1)
+            else if(existscart == null && cartDetailDC.Quantity == 0)
             {
-                await _mongoHelper.OrderCollection().DeleteOneAsync(x => x.Id == existscart.Id);
                 return null;
             }
+            //else if (existscart != null && cartDetailDC.Quantity == 0 && existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId) && existscart.cartDetails.Count == 1)
+            //{
+               
+            //}
             else
             {
                 List<CartDetails> listcartDetails = new List<CartDetails>();
@@ -119,8 +131,12 @@ namespace ServiceLayer.Carts
 
                 if (existscart != null && existscart.cartDetails.Any(x => x.ProductId == cartDetailDC.ProductId))
                 {
-                    var filter = Builders<Cart>.Filter.Eq(s => s.Id, existscart.Id);
-                    existscart.cartDetails = listcartDetails;
+                    var existcartproduct = existscart.cartDetails.Where(x => x.ProductId == cartDetailDC.ProductId).FirstOrDefault();
+                    if(existcartproduct!=null)
+                    {
+                        existscart.cartDetails.Remove(existcartproduct);
+                    }
+                    existscart.cartDetails.AddRange(listcartDetails);
                     if (existscart.cartDetails.Count > 1)
                     {
                         existscart.TotalMrp = existscart.TotalMrp + cart.TotalMrp;
@@ -223,6 +239,7 @@ namespace ServiceLayer.Carts
                         cart.TotalPrice = listcartDetails.Sum(X => X.TotalPrice);
                         cart.Updated_By = userid;
                         cart.Updated_Date = DateTime.Now;
+                        cart.Id = assignCartDC.MongoId;
 
                         await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == assignCartDC.MongoId, cart, new UpdateOptions { IsUpsert = true });
                         return existingcartuser.Id;
@@ -305,6 +322,13 @@ namespace ServiceLayer.Carts
             }
 
             return finalresult;
+        }
+
+        public async Task<Cart> GetCartForUser(string  mongoId)
+        {
+            userid = _jwtMiddleware.GetUserId();
+            var cart= await _mongoHelper.OrderCollection().Find(x => x.Id == mongoId && x.Created_By==userid).FirstOrDefaultAsync();
+            return cart;
         }
 
     }

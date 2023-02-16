@@ -16,5 +16,6 @@ namespace BusinessLayer.Order
         public long UserLocationId { get; set; }
         public bool? IsDelievered { get; set; }
         public string DeliveryToken { get; set; }
+        public string PaymentType { get; set; }
     }
 }

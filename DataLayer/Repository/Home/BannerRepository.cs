@@ -3,7 +3,6 @@ using Dapper;
 using DataContract.Home;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
-using DataLayer.Repository.Order;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -14,25 +13,23 @@ using System.Threading.Tasks;
 
 namespace DataLayer.Repository.Home
 {
-    public class GoalRepository : GenericRepository<Goal>, IGoalRepository
+    public class BannerRepository:GenericRepository<Banner>, IBannerRepository
     {
         private SqlConnection _sqlConnection;
 
         private IDbTransaction _dbTransaction;
 
-        public GoalRepository(SqlConnection sqlConnection, IDbTransaction dbTransaction) : base(sqlConnection, dbTransaction)
+        public BannerRepository(SqlConnection sqlConnection, IDbTransaction dbTransaction) : base(sqlConnection, dbTransaction)
         {
             _dbTransaction = dbTransaction;
             _sqlConnection = sqlConnection;
         }
 
-        public async Task<List<GoalDC>> GetActiveGoalsAsync()
+        public async Task<List<BannerDC>> GetBanner()
         {
             var dbArgs = new DynamicParameters();
-
-
-            //var data =(_sqlConnection.QueryMultiple<AddressDetailDC>)
-            var data = (await _sqlConnection.QueryAsync <GoalDC>("GetActiveGoals", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+           
+            var data = (await _sqlConnection.QueryAsync<BannerDC>("GetActiveBanners", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
             if (data != null)
             {
                 return data.ToList();

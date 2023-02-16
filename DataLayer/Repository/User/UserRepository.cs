@@ -1,21 +1,11 @@
-﻿using BusinessLayer;
-using BusinessLayer.ProductMaster;
+﻿using BusinessLayer.Users;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using DataContract.Auth;
-using DataLayer.Context;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataLayer.Repository.Auth
 {
@@ -32,7 +22,6 @@ namespace DataLayer.Repository.Auth
         }
 
        
-
         public ValidUserDetailDC Authentication(User user)
         {
             DynamicParameters dbArgs = new DynamicParameters();
@@ -63,6 +52,8 @@ namespace DataLayer.Repository.Auth
         {
             try
             {
+               // IDbTransaction dbTransaction = _sqlConnection.BeginTransaction();
+                //_sqlConnection.Open();
                 user.IsActive = true;
                 user.IsDelete = false;
                 user.Created_By = 0;
@@ -78,11 +69,12 @@ namespace DataLayer.Repository.Auth
             }
         }
 
-        public async Task<bool> CheckUserExist(string username)
+        public  async Task<bool> CheckUserExist(string username)
         {
             DynamicParameters dbArgs = new DynamicParameters();
             dbArgs.Add(name: "@Username", value: username);
            
+          
 
             var data = (await _sqlConnection.QueryAsync<bool>("CheckExistsUser", param: dbArgs, transaction: _transaction, commandType: CommandType.StoredProcedure)).FirstOrDefault();
 

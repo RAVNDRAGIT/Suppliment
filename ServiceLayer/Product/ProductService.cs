@@ -1,11 +1,14 @@
 ﻿using AgileObjects.AgileMapper;
-using BusinessLayer.ProductMaster;
+using BusinessLayer.Product;
+using Dapper;
 using DataContract.Product;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
+using Microsoft.Data.SqlClient;
 using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,11 +45,19 @@ namespace ServiceLayer.Product
             return result;
         }
 
-        public async Task<List<ProductMaster>> GetProductDynamically(ProductFilterDC productFilterDC)
+        public async Task<List<DynamicProductDC>> GetProductDynamically(ProductFilterDC productFilterDC)
 
         {
             var data = await _productMasterRepository.GetProductDynamically(productFilterDC);
             return data;
         }
+
+        public async Task<List<DynamicProductDC>> GetLikeProduct(long producttypeid, long productid)
+        {
+
+            var data = await _productMasterRepository.GetLikeProduct(producttypeid,productid);
+            return data;
+        }
+
     }
 }

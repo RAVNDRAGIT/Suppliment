@@ -1,13 +1,16 @@
 ﻿using DataContract.Delivery;
 using DataContract.Payment;
+using DataContract.Product;
 using DataLayer.Context;
 using DataLayer.Interface;
 using DnsClient;
 using MongoDB.Bson.IO;
+using MongoDB.Driver;
 using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -19,116 +22,74 @@ namespace ServiceLayer.Delivery
 {
     public class DeliveryService
     {
-        private readonly DbContext _dbContext;
+  
         private readonly IUnitOfWork _unitofWork;
         private readonly JwtMiddleware _jwtMiddleware;
-        public DeliveryService(DbContext dbContext, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware)
+        private readonly MongoHelper _mongoHelper;
+        private readonly ShippingRocketHelper _shippingRocketHelper;
+        public DeliveryService(ShippingRocketHelper shippingRocketHelper, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware, MongoHelper mongoHelper)
         {
 
-            _dbContext = dbContext;
+           
             _unitofWork = unitOfWork;
             _jwtMiddleware = jwtMiddleware;
+            _mongoHelper = mongoHelper;
+            _shippingRocketHelper = shippingRocketHelper;
         }
 
 
-        public async Task<bool> Authenticate(long orderid)
+        public async Task<string> Authenticate()
         {
-            bool finalresult = false;
-            string email = _dbContext.GetDeliveryemail();
-            string password = _dbContext.GetDeliverypassword();
-            string baseurl = _dbContext.GetDeliveryBaseUrl();
-            long userid = _jwtMiddleware.GetUserId() ?? 0;
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/json"));
-                var data = new AuthenticateDC()
-                {
-                    email = email,
-                    password = password
-                };
-                var result = await client.PostAsJsonAsync(baseurl+ "/external/auth/login", data);
-                if (result != null)
-                {
-                    string resultContent = await result.Content.ReadAsStringAsync();
-                    var authenticateResponse = JsonSerializer.Deserialize<AuthenticateResponseDC>(resultContent);
-                    var updatetokenresult = await _unitofWork.OrderMasterRepository.UpdateDeliveryToken(orderid, userid, authenticateResponse.token);
-                    if (updatetokenresult > 0)
-                    {
-                        _unitofWork.Commit();
-                        finalresult = true;
+          string res= await  _shippingRocketHelper.Authenticate();
+            return res;
 
-                    }
-                }
-            }
-            return finalresult;
         }
 
-        public async Task<bool> GetServicable(long orderid)
+        public async Task<string> GetServicable(ServiceableRequestDC serviceableRequestDC)
         {
+            string etd = null;
+            long? userid = _jwtMiddleware.GetUserId();
             bool result = false;
-            var productdata = await _unitofWork.OrderMasterRepository.GetOrder(orderid);
-            if (productdata != null)
+            int weight = 0;
+            
+            var cart = await _mongoHelper.OrderCollection().Find(x => x.Created_By == userid && x.Id == serviceableRequestDC.mongoId).FirstOrDefaultAsync();
+            List<ProductQuantityDC> list = new List<ProductQuantityDC>();
+            if (cart.cartDetails != null)
             {
-                using (var client = new HttpClient())
+                cart.cartDetails.ForEach(x =>
                 {
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(
-                        new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Add("Authorization", "Bearer"+" "+productdata.DeliveryToken);
-                    //client.DefaultRequestHeaders.Add("pickup_postcode" , 462026);
-                    //client.DefaultRequestHeaders.Add("delivery_postcode" + 462043);
-                    //client.DefaultRequestHeaders.Add("pickup_postcode" + 462026);
-                    //client.DefaultRequestHeaders.Add("pickup_postcode" + 462026);
-                    //client.DefaultRequestHeaders.Add("pickup_postcode" + 462026);
-                    //client.DefaultRequestHeaders.Add("pickup_postcode" + 462026);
-                    var servicablerequestdata = new ServiciabilityDC
-                    {
-                        pickup_postcode = 462026,
-                        delivery_postcode = 452007,
-                        length=2,
-                        height=2,
-                        breadth=2,
-                        weight= 2,
-                        cod=false,
-                        declared_value= Convert.ToInt32( productdata.TotalPrice),
-                        mode= "SURFACE",
-                        only_local=1
+                    ProductQuantityDC productQuantityDC = new ProductQuantityDC();
+                    productQuantityDC.Quantity = x.Quantity;
+                    productQuantityDC.ProductMasterId = x.ProductId;
+                    list.Add(productQuantityDC);
+                });
 
 
-                    };
-                   
-                    string baseurl = _dbContext.GetDeliveryBaseUrl();
-                    var json = JsonSerializer.Serialize(servicablerequestdata);
-                    var request = new HttpRequestMessage
-                    {
-                        Method = HttpMethod.Get,
-                        RequestUri = new Uri(baseurl + "/external/courier/serviceability"),
+                weight = await _unitofWork.ProductMasterRepository.GetWeight(list);
 
-                        Content = new StringContent(json, Encoding.UTF8, "application/json"),
-                        
-                    };
-                    var response = client.SendAsync(request).ConfigureAwait(false);
+                var servicablerequestdata = new ServiciabilityDC
+                {
+                    pickup_postcode = 462026,
+                    delivery_postcode = serviceableRequestDC.delivery_postcode,
+                    length = 0,
+                    height = 0,
+                    breadth = 0,
+                    weight = weight,
+                    cod = true,
 
-                    var responseInfo = response.GetAwaiter().GetResult();
-                   // var responseresult = await client.GetAsync(baseurl + "/external/courier/serviceability", servicablerequestdata);
-                   string resultContent = await responseInfo.Content.ReadAsStringAsync();
-                   
-                    
-                    //if (resultContent)
-                    //{
-                    //    result = true;
-                    //}
-                }
+                    //declared_value= Convert.ToInt32( productdata.TotalPrice),
+                    mode = "SURFACE",
+                    only_local = 0,
+                    token= serviceableRequestDC.token
+
+
+                };
+
+                 etd = await _shippingRocketHelper.GetEtd(servicablerequestdata);
+               
             }
-            return result;
+            return etd;
         }
-
-        //public async Task<long> CreateOrder()
-        //{
-
-        //}
 
     }
 }

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DataContract.Delivery;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Delivery;
+using ServiceLayer.Helper;
 
 namespace Suppliment.API.Controllers.Delivery
 {
@@ -10,21 +12,22 @@ namespace Suppliment.API.Controllers.Delivery
     public class DeliveryController : ControllerBase
     {
         public readonly DeliveryService _deliveryService;
+      
         public DeliveryController(DeliveryService deliveryService) {
             _deliveryService = deliveryService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GenerateToken(long orderid)
+        [HttpGet]
+        public async Task<IActionResult> GenerateToken()
         {
-            var data = await _deliveryService.Authenticate(orderid);
+            var data = await _deliveryService.Authenticate();
             return Ok(data);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetServicable(long orderid)
+        [HttpPost]
+        public async Task<IActionResult> GetServicable(ServiceableRequestDC serviceableRequestDC)
         {
-            var data = await _deliveryService.GetServicable(orderid);
+            var data = await _deliveryService.GetServicable(serviceableRequestDC);
             return Ok(data);
         }
     }

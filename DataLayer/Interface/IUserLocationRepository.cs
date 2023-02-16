@@ -1,4 +1,5 @@
-﻿using BusinessLayer;
+﻿using BusinessLayer.Users;
+using DataContract.Address;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace DataLayer.Interface
     {
         Task<long> SubmitUserLocation(UserLocation userLocations,long userid);
         Task<UserLocation> GetById(long id);
+        Task<List<UserLocationResultDC>> GetAddressbyUserId(long userid);
     }
 }

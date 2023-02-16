@@ -5,6 +5,10 @@
         public string SuccessMessage { get; set; }
         public string ErrorMessage { get; set; } 
         public List<T> list {get;set ;}
+        public T tobj { get; set; }
+        public bool IsSucess { get; set; } = false;
+        public bool IsError { get; set; }=false;
+
         
     }
 }

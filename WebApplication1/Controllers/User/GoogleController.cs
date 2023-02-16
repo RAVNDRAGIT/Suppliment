@@ -7,6 +7,7 @@ namespace Suppliment.API.Controllers.User
 {
     [Route("api/[controller]")]
     [ApiController]
+   
     public class GoogleController : ControllerBase
     {
         private readonly GoogleService _googleService;
@@ -16,19 +17,14 @@ namespace Suppliment.API.Controllers.User
         }
 
         [HttpPost]
-        public IActionResult Authentication(GooglePayloadDc googlePayloadDc)
+        public async Task <IActionResult> Authentication(GooglePayloadDc googlePayloadDc)
         {
-            try
-            {
-                var result = _googleService.ValidateGoogleToken(googlePayloadDc);
+           
+                var result = await _googleService.ValidateGoogleToken(googlePayloadDc);
 
 
                 return Ok(result);
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
+            
 
         }
 
