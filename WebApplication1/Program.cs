@@ -54,6 +54,7 @@ builder.Services.AddScoped< OrderService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped< WhatsAppHelper>();
 builder.Services.AddScoped<MongoHelper>();
+builder.Services.AddScoped<ExcelHelper>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<IPincodeRepository, PincodeRepository>();
 builder.Services.AddScoped<PinCodeService>();
@@ -76,7 +77,12 @@ builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<BannerService>();
 builder.Services.AddScoped<IProductTypeRepository, ProductTypeRepository>();
 builder.Services.AddScoped<ProductTypeService>();
+builder.Services.AddScoped<IUnitOfMeasurementRepository, UnitOfMeasurementMasterRepository>();
+builder.Services.AddScoped<UomService>();
 builder.Services.AddScoped<ShippingRocketHelper>();
+builder.Services.AddScoped<FileHelper>();
+builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
+
 WhatsAppBusinessCloudApiConfig whatsAppConfig = new WhatsAppBusinessCloudApiConfig();
 whatsAppConfig.WhatsAppBusinessPhoneNumberId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessPhoneNumberId"];
 whatsAppConfig.WhatsAppBusinessAccountId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessAccountId"];
@@ -148,7 +154,7 @@ builder.Services.Configure<FormOptions>(o =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
-        builder => builder.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        builder => builder.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:64400", "https://localhost:64400","*").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 var app = builder.Build();
@@ -163,11 +169,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseStaticFiles();
-app.UseStaticFiles(new StaticFileOptions()
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-    RequestPath = new PathString("/Resources")
-});
+//app.UseStaticFiles(new StaticFileOptions()
+//{
+//    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
+//    RequestPath = new PathString("/Resources")
+//});
 
 // Shows UseCors with named policy.
 app.UseCors("MyPolicy");

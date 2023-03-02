@@ -21,5 +21,12 @@ namespace Suppliment.API.Controllers.Home
             var data = await _categoryService.GetActiveCategories();
             return Ok(data);
         }
+
+        [HttpPost, DisableRequestSizeLimit]
+        public async Task<IActionResult> Save(IFormFile file)
+        {
+            var data = await _categoryService.Save();
+            return Ok(data);
+        }
     }
 }

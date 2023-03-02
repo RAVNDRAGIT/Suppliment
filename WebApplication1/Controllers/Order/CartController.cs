@@ -35,10 +35,17 @@ namespace Suppliment.API.Controllers.Order
             return Ok(res);
         }
 
+        //[HttpDelete]
+        //public async Task<IActionResult> RemoveCart(string cookieValue)
+        //{
+        //    bool res = await _cartService.RemoveAsync(cookieValue);
+        //    return Ok(res);
+        //}
+
         [HttpDelete]
-        public async Task<IActionResult> RemoveCart(string cookieValue)
+        public async Task<IActionResult> RemoveCart(RemoveItemDC removeItemDC)
         {
-            bool res = await _cartService.RemoveAsync(cookieValue);
+            bool res = await _cartService.Removeitem(removeItemDC);
             return Ok(res);
         }
     }

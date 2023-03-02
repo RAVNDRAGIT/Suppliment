@@ -15,5 +15,6 @@ namespace DataContract.Product
         public long? categoryid { get; set; }
         public long? producttypeid { get; set; }
         public long? goalid { get; set; }
+        public bool isdiscountproduct { get; set; }
     }
 }

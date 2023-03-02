@@ -1,4 +1,5 @@
-﻿using DataContract.Product;
+﻿using BusinessLayer.Product;
+using DataContract.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace DataLayer.Interface
     public interface IProductTypeRepository
     {
         Task<List<ProductTypeDC>> GetProductTypeList();
+        Task<long> Save(List<ProductType> list);
+        Task<long> AddProductType(ProductType productType );
 
     }
 }

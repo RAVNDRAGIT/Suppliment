@@ -21,7 +21,7 @@ namespace Suppliment.API.Controllers.Product
             _productMasterService = productMasterService;
             
         }
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult>AddProductAsync(ProductMasterDC productMasterDC)
         {
            
@@ -37,6 +37,20 @@ namespace Suppliment.API.Controllers.Product
             }
         }
 
-       
+        [HttpPost, DisableRequestSizeLimit]
+        public async Task<IActionResult> AddExcelProduct(IFormFile file)
+        {
+
+            bool result = await _productMasterService.AddExcelProduct();
+
+            if (result)
+            {
+                return Ok("Product Added Succesfully!");
+            }
+            else
+            {
+                return BadRequest("Something went wrong plz try again later!!");
+            }
+        }
     }
 }

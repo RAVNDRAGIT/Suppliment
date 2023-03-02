@@ -96,7 +96,7 @@ namespace DataLayer.Repository.Product
                 dbArgs.Add(name: "@goalid", value: productFilterDC.goalid);
             }
 
-
+           
             var data = (await _sqlConnection.QueryAsync<DynamicProductDC>("[dbo].[GetProductDynamically]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
             return data.ToList();
         }
@@ -120,6 +120,31 @@ namespace DataLayer.Repository.Product
 
 
             return res.FirstOrDefault();
+        }
+
+        public async Task<List<DynamicProductDC>> GetDiscountProduct(int skip,int take)
+        {
+            var dbArgs = new DynamicParameters();
+            
+                dbArgs.Add(name: "@skip", value: skip);
+            
+                dbArgs.Add(name: "@take", value: take);
+
+            var data = (await _sqlConnection.QueryAsync<DynamicProductDC>("[dbo].[GetMostDiscountedProducts]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            return data.ToList();
+
+        }
+
+        public async Task<bool> AddProductList(List<ProductMaster> productMaster)
+        {
+          
+            int res = await _sqlConnection.InsertAsync<List<ProductMaster>>(productMaster, _transaction);
+            if (res > 0)
+            {
+
+                return true;
+            }
+            return false;
         }
     }
 }

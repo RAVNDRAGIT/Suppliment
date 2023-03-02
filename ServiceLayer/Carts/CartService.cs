@@ -293,10 +293,7 @@ namespace ServiceLayer.Carts
         {
             bool finalresult = false;
             Cart existscart = new Cart();
-            var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
-                                                f => f.ProductId == removeItemDC.productid);
-            var result = _mongoHelper.OrderCollection()
-                .FindOneAndDeleteAsync(p => p.Id == removeItemDC.mongoid).Result;
+           
             userid = _jwtMiddleware.GetUserId();
             if (userid != null && userid.HasValue)
             {
@@ -318,6 +315,21 @@ namespace ServiceLayer.Carts
                 else
                 {
                     finalresult= false;
+                }
+            }
+            else
+            {
+                var update = Builders<Cart>.Update.PullFilter(p => p.cartDetails,
+                                               f => f.ProductId == removeItemDC.productid);
+                var result = _mongoHelper.OrderCollection()
+                    .FindOneAndUpdateAsync(p => p.Id == removeItemDC.mongoid, update);
+                if (result.IsCompleted)
+                {
+                    finalresult = true;
+                }
+                else
+                {
+                    finalresult = false;
                 }
             }
 

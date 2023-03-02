@@ -144,6 +144,30 @@ namespace DataLayer.Context
             string conn = _configuration.GetSection("ConnectionStrings").GetSection("SqlConnection").Value;
             return conn;
         }
+
+        public string GetCloudinaryName()
+        {
+            string clname = _configuration.GetSection("Cloudinary").GetSection("CloudName").Value;
+            return clname;
+        }
+
+        public string GetCloudinaryApiKey()
+        {
+            string clname = _configuration.GetSection("Cloudinary").GetSection("ApiKey").Value;
+            return clname;
+        }
+
+        public string GetCloudinaryApiSecret()
+        {
+            string clname = _configuration.GetSection("Cloudinary").GetSection("ApiSecret").Value;
+            return clname;
+        }
+
+        public string GetCloudinaryUrl()
+        {
+            string clurl = _configuration.GetSection("Cloudinary").GetSection("Url").Value;
+            return clurl;
+        }
         public IDbConnection CreateConnection()
         {
             //_connection = new SqlConnection();

@@ -20,5 +20,12 @@ namespace Suppliment.API.Controllers.Home
             var data= await _goalService.GetActiveGoals();
             return Ok(data);
         }
+
+        [HttpPost, DisableRequestSizeLimit]
+        public async Task<IActionResult> Save(IFormFile file)
+        {
+            var data = await _goalService.Save();
+            return Ok(data);
+        }
     }
 }

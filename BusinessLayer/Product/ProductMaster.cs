@@ -15,11 +15,12 @@ namespace BusinessLayer.Product
         public int Quantity { get; set; } = 0;
         public double Discount { get; set; } = 0;
         public double DiscountPercentage { get; set; } = 0;
-        public string ImagePath { get; set; }
+      
         public long CategoryId { get; set; }
         public long ProductTypeId { get; set; }
         public long GoalId { get; set; }
         public long UomId { get; set; }
+        public Double Weight { get; set; }
 
     }
 }

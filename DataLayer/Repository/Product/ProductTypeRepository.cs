@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Product;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using DataContract.Product;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -25,6 +26,19 @@ namespace DataLayer.Repository.Product
             _sqlConnection = sqlConnection;
         }
 
+        public async Task<long> AddProductType(ProductType productType)
+        {
+            productType.IsActive = true;
+            productType.IsDelete = false;
+            productType.Created_Date=DateTime.Now;
+            productType.Created_By = 0;
+            productType.Updated_Date = DateTime.Now;
+            productType.Updated_By = 0;
+
+            var res = await _sqlConnection.InsertAsync(productType,_transaction);
+            return res;
+        }
+
         public async Task<List<ProductTypeDC>> GetProductTypeList()
         {
             var dbArgs = new DynamicParameters();
@@ -32,6 +46,12 @@ namespace DataLayer.Repository.Product
             var data = (await _sqlConnection.QueryAsync<ProductTypeDC>("[dbo].[GetActiveProductType]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
             return data.ToList();
 
+        }
+
+        public async Task<long> Save(List<ProductType> list)
+        {
+            var data = await _sqlConnection.InsertAsync<List<ProductType>>(list, _transaction);
+            return data;
         }
     }
 }

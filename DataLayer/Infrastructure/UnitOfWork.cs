@@ -34,7 +34,15 @@ namespace DataLayer.Infrastructure
 
         public IProductTypeRepository ProductTypeRepository { get; }
         public IProductMasterRepository ProductMasterRepository { get; }
-        public UnitOfWork( IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository,IUserLocationRepository userLocationRepository,IProductTypeRepository productTypeRepository,IProductMasterRepository productMasterRepository)
+        public IUnitOfMeasurementRepository UnitOfMeasurementRepository { get; }
+
+        public IGoalRepository GoalRepository { get; }
+
+        public ICategoryRepository CategoryRepository { get; }
+
+        public IProductImageRepository ProductImageRepository { get; }
+        public IBannerRepository BannerRepository { get; }
+        public UnitOfWork( IDbTransaction dbTransaction, IOrderDetailRepository orderDetailRepository, IOrderMasterRepository orderMasterRepository, IUserRepository userRepository,IUserLocationRepository userLocationRepository,IProductTypeRepository productTypeRepository,IProductMasterRepository productMasterRepository, IUnitOfMeasurementRepository unitOfMeasurementRepository, IGoalRepository goalRepository,ICategoryRepository categoryRepository, IProductImageRepository productImageRepository, IBannerRepository bannerRepository)
         {
            
             _dbTransaction = dbTransaction;
@@ -44,7 +52,11 @@ namespace DataLayer.Infrastructure
             UserLocationRepository = userLocationRepository;
             ProductTypeRepository = productTypeRepository;
             ProductMasterRepository = productMasterRepository;
-
+            UnitOfMeasurementRepository = unitOfMeasurementRepository;
+            GoalRepository = goalRepository;
+            CategoryRepository = categoryRepository;
+            ProductImageRepository= productImageRepository;
+            BannerRepository = bannerRepository;
         }
         public void Commit()
         {

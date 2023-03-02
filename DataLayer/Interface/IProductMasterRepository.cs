@@ -17,6 +17,10 @@ namespace DataLayer.Interface
         Task<List<DynamicProductDC>> GetLikeProduct(long producttypeid,long productid);
 
         Task<int> GetWeight(List<ProductQuantityDC> productQuantities);
-        
+        Task<List<DynamicProductDC>> GetDiscountProduct(int skip, int take);
+
+        Task<bool> AddProductList(List<ProductMaster> productMaster);
+
+
     }
 }

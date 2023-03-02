@@ -1,4 +1,5 @@
-﻿using DataContract.Home;
+﻿using BusinessLayer.Home;
+using DataContract.Home;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,7 @@ namespace DataLayer.Interface
     public interface IBannerRepository
     {
         Task<List<BannerDC>> GetBanner();
+
+        Task<long> SaveBulkBanner(List<Banner> list);
     }
 }

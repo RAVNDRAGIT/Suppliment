@@ -20,5 +20,12 @@ namespace Suppliment.API.Controllers.Home
             var data = await _bannerService.GetBannerList();
             return Ok(data);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveBulkBanner()
+        {
+            var data = await _bannerService.SaveBulkBanner();
+            return Ok(data);
+        }
     }
 }

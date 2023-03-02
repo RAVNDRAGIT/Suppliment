@@ -1,4 +1,6 @@
-﻿using Dapper;
+﻿using BusinessLayer.Home;
+using Dapper;
+using Dapper.Contrib.Extensions;
 using DataContract.Home;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -38,6 +40,24 @@ namespace DataLayer.Repository.Home
             {
                 return null;
             }
+        }
+
+        public async Task<long> Save(List<CategoryMaster> list)
+        {
+            var data = await _sqlConnection.InsertAsync<List<CategoryMaster>>(list, _transaction);
+            return data;
+        }
+
+        public async Task<long> Save(CategoryMaster category)
+        {
+            category.IsActive = true;
+            category.IsDelete = false;
+            category.Created_By = 0;
+            category.Created_Date = DateTime.Now;
+            category.Updated_By = 0;
+            category.Updated_Date = DateTime.Now;
+            var data = await _sqlConnection.InsertAsync<CategoryMaster>(category, _transaction);
+            return data;
         }
     }
 }

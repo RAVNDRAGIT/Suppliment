@@ -16,6 +16,12 @@ namespace DataLayer.Interface
         IUserLocationRepository UserLocationRepository { get; }
         IProductTypeRepository ProductTypeRepository { get; }
         IProductMasterRepository ProductMasterRepository { get; }
+        IUnitOfMeasurementRepository UnitOfMeasurementRepository { get; }
+        IGoalRepository GoalRepository { get; }
+        ICategoryRepository CategoryRepository { get; }
+        IProductImageRepository ProductImageRepository { get; }
+        IBannerRepository BannerRepository { get; }
+       
         //void BeginTrans();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Home;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using DataContract.Home;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
@@ -41,6 +42,25 @@ namespace DataLayer.Repository.Home
             {
                 return null;
             }
+        }
+
+        public async Task<long> Save(List<Goal> goals)
+        {
+            long res = await _sqlConnection.InsertAsync<List<Goal>>(goals, _transaction);
+            return res;
+        }
+
+        public async Task<long> AddGoal(Goal  goal)
+        {
+          
+            goal.IsActive = true;
+            goal.IsDelete = false;
+            goal.Created_Date = DateTime.Now;
+            goal.Created_By = 0;
+            goal.Updated_By = 0;
+            goal.Updated_Date = DateTime.Now;
+            long res = await _sqlConnection.InsertAsync<Goal>(goal, _transaction);
+            return res;
         }
     }
 }

@@ -11,5 +11,7 @@ namespace DataLayer.Interface
     public interface IGoalRepository
     {
         Task<List<GoalDC>> GetActiveGoalsAsync();
+        Task<long> Save(List<Goal> goals);
+        Task<long> AddGoal(Goal goal);
     }
 }
