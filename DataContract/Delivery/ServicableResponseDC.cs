@@ -63,7 +63,7 @@ namespace DataContract.Delivery
         public bool is_surface { get; set; }
         public int local_region { get; set; }
         public int metro { get; set; }
-        public int min_weight { get; set; }
+        //public double min_weight { get; set; }
         public int mode { get; set; }
         public bool odablock { get; set; }
         public int other_charges { get; set; }
@@ -87,7 +87,7 @@ namespace DataContract.Delivery
         public string state { get; set; }
         public string suppress_date { get; set; }
         public string suppress_text { get; set; }
-        public SuppressionDates suppression_dates { get; set; }
+        //public SuppressionDates suppression_dates { get; set; }
         public string surface_max_weight { get; set; }
         public double tracking_performance { get; set; }
         public object volumetric_max_weight { get; set; }

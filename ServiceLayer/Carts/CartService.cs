@@ -5,6 +5,7 @@ using DataContract;
 using DataContract.Cart;
 using DataLayer.Context;
 using DataLayer.Interface;
+using DataLayer.Repository.Product;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -26,15 +27,15 @@ namespace ServiceLayer.Carts
         public MongoHelper _mongoHelper;
         private long? userid;
         public JwtMiddleware _jwtMiddleware;
-        public IProductMasterRepository _productMasterRepository;
+   
         public CartService(
-            IOptions<MongoDbDC> mongoDbDC, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware, IProductMasterRepository productMasterRepository, MongoHelper mongoHelper)
+            IOptions<MongoDbDC> mongoDbDC, IUnitOfWork unitOfWork, JwtMiddleware jwtMiddleware, MongoHelper mongoHelper)
         {
             _unitofWork = unitOfWork;
             _mongoHelper = mongoHelper;
             _jwtMiddleware = jwtMiddleware;
 
-            _productMasterRepository = productMasterRepository;
+           
         }
 
         public async Task<List<Cart>> GetAsync() =>
@@ -100,7 +101,8 @@ namespace ServiceLayer.Carts
             {
                 List<CartDetails> listcartDetails = new List<CartDetails>();
                 Cart cart = new Cart();
-                var data = await _productMasterRepository.GetProduct(cartDetailDC.ProductId);
+                // var data = await _productMasterRepository.GetProduct(cartDetailDC.ProductId);
+                var data = await _unitofWork.ProductMasterRepository.GetProductForCart(cartDetailDC.ProductId);
                 if (data != null)
                 {
                     CartDetails cartDetails = Mapper.Map(data).ToANew<CartDetails>();
@@ -204,7 +206,8 @@ namespace ServiceLayer.Carts
                     Cart cart = new Cart();
                     foreach (var cartitem in existingcartuser.cartDetails)
                     {
-                        var data = await _productMasterRepository.GetProduct(cartitem.ProductId);
+                        // var data = await _productMasterRepository.GetProduct(cartitem.ProductId);
+                        var data = await _unitofWork.ProductMasterRepository.GetProduct(cartitem.ProductId);
                         if (data != null)
                         {
                             CartDetails cartDetails = Mapper.Map(data).ToANew<CartDetails>();

@@ -146,5 +146,17 @@ namespace DataLayer.Repository.Product
             }
             return false;
         }
+
+        public async Task<ProductForCartDc> GetProductForCart(long productid)
+        {
+            var dbArgs = new DynamicParameters();
+
+            dbArgs.Add(name: "@ProductId", value: productid);
+
+          
+
+            var data = (await _sqlConnection.QueryAsync<ProductForCartDc>("[dbo].[GetProductForCartByProductId]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            return data.FirstOrDefault();
+        }
     }
 }

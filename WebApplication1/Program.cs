@@ -154,7 +154,7 @@ builder.Services.Configure<FormOptions>(o =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
-        builder => builder.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:64400", "https://localhost:64400","*").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        builder => builder.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:64400", "https://localhost:64400", "https://fitbuddytest-d48d5.web.app","http://localhost", "https://localhost").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 var app = builder.Build();

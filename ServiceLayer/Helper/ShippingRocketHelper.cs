@@ -50,7 +50,7 @@ namespace ServiceLayer.Helper
                         return null;
                     }
 
-                    
+
                 }
                 else
                 {
@@ -62,53 +62,60 @@ namespace ServiceLayer.Helper
 
         public async Task<string> GetEtd(ServiciabilityDC serviceableRequestDC)
         {
-            string etd = null;
-            using (var client = new HttpClient())
+            try
             {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer" + " " + serviceableRequestDC.token);
-               
-               
-
-                string baseurl = _dbContext.GetDeliveryBaseUrl();
-                var json = JsonSerializer.Serialize(serviceableRequestDC);
-                var request = new HttpRequestMessage
+                string etd = null;
+                using (var client = new HttpClient())
                 {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri(baseurl + "/external/courier/serviceability"),
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Authorization", "Bearer" + " " + serviceableRequestDC.token);
 
-                    Content = new StringContent(json, Encoding.UTF8, "application/json"),
 
-                };
-                var response = client.SendAsync(request).ConfigureAwait(false);
 
-                var responseInfo = response.GetAwaiter().GetResult();
-                if (responseInfo.StatusCode == HttpStatusCode.OK)
-                {
-                    string resultContent = await responseInfo.Content.ReadAsStringAsync();
-
-                    if (resultContent != null)
+                    string baseurl = _dbContext.GetDeliveryBaseUrl();
+                    var json = JsonSerializer.Serialize(serviceableRequestDC);
+                    var request = new HttpRequestMessage
                     {
-                        var servicableresponse = JsonSerializer.Deserialize<ServicableResponseDC>(resultContent);
-                        if (servicableresponse != null)
+                        Method = HttpMethod.Get,
+                        RequestUri = new Uri(baseurl + "/external/courier/serviceability"),
+
+                        Content = new StringContent(json, Encoding.UTF8, "application/json"),
+
+                    };
+                    var response = client.SendAsync(request).ConfigureAwait(false);
+
+                    var responseInfo = response.GetAwaiter().GetResult();
+                    if (responseInfo.StatusCode == HttpStatusCode.OK)
+                    {
+                        string resultContent = await responseInfo.Content.ReadAsStringAsync();
+
+                        if (resultContent != null)
                         {
-                            int comapntcourierid = servicableresponse.data.recommended_courier_company_id;
-                            var couriercompanydata = servicableresponse.data.available_courier_companies.Where(x => x.courier_company_id == servicableresponse.data.recommended_courier_company_id).FirstOrDefault();
-                            if (couriercompanydata != null)
+                            var servicableresponse = JsonSerializer.Deserialize<ServicableResponseDC>(resultContent);
+                            if (servicableresponse != null)
                             {
-                                etd = couriercompanydata.etd;
+                                int comapntcourierid = servicableresponse.data.recommended_courier_company_id;
+                                var couriercompanydata = servicableresponse.data.available_courier_companies.Where(x => x.courier_company_id == servicableresponse.data.recommended_courier_company_id).FirstOrDefault();
+                                if (couriercompanydata != null)
+                                {
+                                    etd = couriercompanydata.etd;
+                                }
                             }
+
+
                         }
-
-
                     }
+
+
                 }
-
-
+                return etd;
             }
-            return etd;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

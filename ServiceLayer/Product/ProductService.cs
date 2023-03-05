@@ -24,7 +24,6 @@ namespace ServiceLayer.Product
     public class ProductService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IProductMasterRepository _productMasterRepository;
         private readonly JwtMiddleware _jwtMiddleware;
         private readonly ExcelHelper _excelHelper;
         private readonly FileHelper _fileHelper;
@@ -42,7 +41,7 @@ namespace ServiceLayer.Product
             if (productMasterDC != null)
             {
                 var productMaster = Mapper.Map(productMasterDC).ToANew<ProductMaster>();
-                bool res = await _productMasterRepository.AddProduct(productMaster, userid);
+                bool res = await _unitOfWork.ProductMasterRepository.AddProduct(productMaster, userid);
                 if (res)
                 {
 
@@ -56,21 +55,21 @@ namespace ServiceLayer.Product
         public async Task<List<DynamicProductDC>> GetProductDynamically(ProductFilterDC productFilterDC)
 
         {
-            var data = await _productMasterRepository.GetProductDynamically(productFilterDC);
+            var data = await _unitOfWork.ProductMasterRepository.GetProductDynamically(productFilterDC);
             return data;
         }
 
         public async Task<List<DynamicProductDC>> GetLikeProduct(long producttypeid, long productid)
         {
 
-            var data = await _productMasterRepository.GetLikeProduct(producttypeid, productid);
+            var data = await _unitOfWork.ProductMasterRepository.GetLikeProduct(producttypeid, productid);
             return data;
         }
 
         public async Task<List<DynamicProductDC>> GetDiscountProduct(int skip, int take)
 
         {
-            var data = await _productMasterRepository.GetDiscountProduct(skip, take);
+            var data = await _unitOfWork.ProductMasterRepository.GetDiscountProduct(skip, take);
             return data;
         }
 

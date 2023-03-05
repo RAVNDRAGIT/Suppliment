@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Product;
 using DataContract.Product;
+using DataLayer.Repository.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace DataLayer.Interface
         Task<List<DynamicProductDC>> GetDiscountProduct(int skip, int take);
 
         Task<bool> AddProductList(List<ProductMaster> productMaster);
+
+        Task<ProductForCartDc> GetProductForCart(long productid);
 
 
     }
