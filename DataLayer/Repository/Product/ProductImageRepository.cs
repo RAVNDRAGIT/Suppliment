@@ -1,5 +1,7 @@
 ﻿using BusinessLayer.Product;
+using Dapper;
 using Dapper.Contrib.Extensions;
+using DataContract.Product;
 using DataLayer.Infrastructure;
 using DataLayer.Interface;
 using Microsoft.Data.SqlClient;
@@ -27,6 +29,17 @@ namespace DataLayer.Repository.Product
         {
             var res = await _sqlConnection.InsertAsync<List<ProductImage>>(images, _transaction);
             return res;
+        }
+        public async Task<List<ProductImageDC>> GetProductImagebyProductId(long productid)
+        {
+            var dbArgs = new DynamicParameters();
+
+            dbArgs.Add(name: "@ProductId", value: productid);
+
+
+
+            var data = (await _sqlConnection.QueryAsync<ProductImageDC>("[dbo].[GetProductImagesbyProductId]", transaction: _transaction, param: dbArgs, commandType: CommandType.StoredProcedure, commandTimeout: 30000));
+            return data.ToList();
         }
     }
 }
