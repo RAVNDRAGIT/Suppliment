@@ -54,6 +54,8 @@ namespace ServiceLayer.Carts
                 existscart = await _mongoHelper.OrderCollection().Find(x => x.CookieValue == cookievalue).FirstOrDefaultAsync();
 
             }
+
+            
             return existscart;
 
         }
@@ -156,7 +158,8 @@ namespace ServiceLayer.Carts
 
                     existscart.Updated_By = userid;
                     existscart.Updated_Date = DateTime.Now;
-                    await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
+                    existscart.cartDetails= existscart.cartDetails.OrderByDescending(x => x.Created_Date).ToList();
+                   await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
                     return existscart.Id;
 
                 }
@@ -172,6 +175,8 @@ namespace ServiceLayer.Carts
                     //var update = Builders<CartDetails>.Filter.Where(s => s.ProductId== cartDetailDC.ProductId);
                     //var updatecurrentcart= Builders<CartDetails>.Update.Set(s => s.Quantity, data.Quantity);
                     //var result = await _cart.UpdateOneAsync(filter, update);
+                    existscart.cartDetails = existscart.cartDetails.OrderByDescending(x => x.Created_Date).ToList();
+
                     await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == existscart.Id, existscart, new UpdateOptions { IsUpsert = true });
                     return existscart.Id;
                 }
@@ -243,6 +248,7 @@ namespace ServiceLayer.Carts
                         cart.Updated_By = userid;
                         cart.Updated_Date = DateTime.Now;
                         cart.Id = assignCartDC.MongoId;
+                        cart.cartDetails = cart.cartDetails.OrderByDescending(x => x.Created_Date).ToList();
 
                         await _mongoHelper.OrderCollection().ReplaceOneAsync(x => x.Id == assignCartDC.MongoId, cart, new UpdateOptions { IsUpsert = true });
                         return existingcartuser.Id;
