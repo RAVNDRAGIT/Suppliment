@@ -245,6 +245,7 @@ namespace ServiceLayer.Carts
                         cart.TotalMrp = listcartDetails.Sum(X => X.TotalMrp);
                         cart.TotalDiscount = listcartDetails.Sum(X => X.TotalDiscount);
                         cart.TotalPrice = listcartDetails.Sum(X => X.TotalPrice);
+                        cart.Created_By = userid;
                         cart.Updated_By = userid;
                         cart.Updated_Date = DateTime.Now;
                         cart.Id = assignCartDC.MongoId;

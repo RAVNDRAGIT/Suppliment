@@ -83,6 +83,7 @@ builder.Services.AddScoped<ShippingRocketHelper>();
 builder.Services.AddScoped<FileHelper>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<ProductImageService>();
+builder.Services.AddScoped<NotificationHelper>();
 
 WhatsAppBusinessCloudApiConfig whatsAppConfig = new WhatsAppBusinessCloudApiConfig();
 whatsAppConfig.WhatsAppBusinessPhoneNumberId = builder.Configuration.GetSection("WhatsAppBusinessCloudApiConfiguration")["WhatsAppBusinessPhoneNumberId"];

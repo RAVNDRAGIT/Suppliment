@@ -168,6 +168,12 @@ namespace DataLayer.Context
             string clurl = _configuration.GetSection("Cloudinary").GetSection("Url").Value;
             return clurl;
         }
+
+        public string GetFCMUrl()
+        {
+            string url = _configuration.GetSection("Firebase").GetSection("RequestUrl").Value;
+            return url;
+        }
         public IDbConnection CreateConnection()
         {
             //_connection = new SqlConnection();
