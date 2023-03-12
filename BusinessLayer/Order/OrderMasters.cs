@@ -17,5 +17,7 @@ namespace BusinessLayer.Order
         public bool? IsDelievered { get; set; }
         public string DeliveryToken { get; set; }
         public string PaymentType { get; set; }
+        public bool? IsMsgSent { get; set; }
+        public string PaymentRequestOrderId { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using ServiceLayer.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -28,26 +29,28 @@ namespace ServiceLayer.Payment
        
         public DbContext _dbContext;
         private readonly string Baseurl;
-        private readonly string notifyurl;
-        private readonly string returnurl;
+        //private  string notifyurl;
+        //private  string returnurl;
         private readonly string clientid;
         private readonly string clientsecret;
         private readonly string apiversion;
         public IUnitOfWork _unitOfWork;
         private readonly long userid;
         private JwtMiddleware _jwtMiddleware;
-        public PaymentService(IUnitOfWork unitOfWork, MongoHelper mongoHelper,  DbContext dbContext, JwtMiddleware jwtMiddleware)
+        private readonly WhatsAppHelper _whatsAppHelper;
+        public PaymentService(IUnitOfWork unitOfWork, MongoHelper mongoHelper,  DbContext dbContext, JwtMiddleware jwtMiddleware, WhatsAppHelper whatsAppHelper)
         {
             _unitOfWork = unitOfWork;
             _mongoHelper = mongoHelper;
             _dbContext = dbContext;
              Baseurl = _dbContext.GetBaseUrl();
-             notifyurl = _dbContext.GetNotifyUrl();
-             returnurl = _dbContext.GetReturnUrl();
+             
+            
             clientid= _dbContext.GetClientId();
             clientsecret = _dbContext.GetClientSecret();
             apiversion = _dbContext.GetApiVersion();
             _jwtMiddleware = jwtMiddleware;
+            _whatsAppHelper = whatsAppHelper;
         }
 
         public async Task<string> CreateOrderAsync(long orderid)
@@ -82,7 +85,8 @@ namespace ServiceLayer.Payment
                      customerid = Convert.ToString(basecustomerdata.Id);
                      customerphone = customerdata.Mobile;
                 }
-
+                string returnurl = _dbContext.GetReturnUrl();
+                string notifyurl = _dbContext.GetNotifyUrl();
                 OrderMeta orderMeta = new OrderMeta
                 {
                     notify_url = notifyurl,
@@ -98,7 +102,7 @@ namespace ServiceLayer.Payment
 
                 CreateOrderRequestDC createOrderRequestDC = new CreateOrderRequestDC
                 {
-                    order_id =  Convert.ToString(orderid),
+                    order_id = orderdata.PaymentRequestOrderId,
                     order_amount = orderAmount,
                     order_currency = "INR",
                     order_expiry_time = DateTime.Now.AddMinutes(18),
@@ -109,7 +113,7 @@ namespace ServiceLayer.Payment
 
 
                 var result = await client.PostAsJsonAsync(Baseurl, createOrderRequestDC);
-                if(result!=null)
+                if(result.IsSuccessStatusCode)
                 {
 
                 
@@ -121,6 +125,8 @@ namespace ServiceLayer.Payment
                     res.Created_Date= DateTime.Now;
                     res.Updated_By=userid;
                     res.Updated_By= userid;
+                    res.order_id = orderdata.PaymentRequestOrderId;
+                    res.DbOrderId = orderid;
                 await _mongoHelper.OrderResponseCollection().InsertOneAsync(res);
                 return res.payment_session_id;
                 }
@@ -159,10 +165,10 @@ namespace ServiceLayer.Payment
             }
         }
 
-        public async Task<bool> AfterPayment(long orderid)
+        public async Task<bool> AfterPayment(string resorderid)
         {
             bool finalresult = false;
-            string strorderid = Convert.ToString(orderid);
+         //   string strorderid = Convert.ToString(orderid);
             long userid = _jwtMiddleware.GetUserId()??0;
 
 
@@ -175,7 +181,7 @@ namespace ServiceLayer.Payment
                 client.DefaultRequestHeaders.Add("x-client-id", clientid);
                 client.DefaultRequestHeaders.Add("x-client-secret", clientsecret);
                 client.DefaultRequestHeaders.Add("x-api-version", apiversion);
-                var result = await client.GetAsync(Baseurl+"/"+ strorderid);
+                var result = await client.GetAsync(Baseurl+"/"+ resorderid);
                 string resultContent = await result.Content.ReadAsStringAsync();
                 CreateOrderResponseDC createOrderResponseDC = JsonSerializer.Deserialize<CreateOrderResponseDC>(resultContent);
                 var data = await _mongoHelper.OrderResponseCollection().Find(x => x.order_id == createOrderResponseDC.order_id).FirstOrDefaultAsync();
@@ -187,16 +193,17 @@ namespace ServiceLayer.Payment
                     createOrderResponseDC.Id = data.Id;
                     createOrderResponseDC.IsActive = true;
                     createOrderResponseDC.IsDelete = false;
+                    createOrderResponseDC.DbOrderId = data.DbOrderId;
                     await _mongoHelper.OrderResponseCollection().ReplaceOneAsync(x => x.Id == data.Id, createOrderResponseDC, new UpdateOptions { IsUpsert = true });
                     bool orderstatus = false;
                     if (createOrderResponseDC.order_status == "PAID")
                     {
                         orderstatus = true;
                     }
-                    bool updateorderresult = await _unitOfWork.OrderMasterRepository.UpdateOrderPayment(Convert.ToInt64(data.order_id), orderstatus, userid);
+                    bool updateorderresult = await _unitOfWork.OrderMasterRepository.UpdateOrderPayment(data.DbOrderId, orderstatus, userid);
                     if (updateorderresult)
                     {
-                        var orderdetailresult = await _unitOfWork.OrderDetailRepository.GetOrderDetailsbyOrderId(Convert.ToInt64(data.order_id));
+                        var orderdetailresult = await _unitOfWork.OrderDetailRepository.GetOrderDetailsbyOrderId(data.DbOrderId);
                         List<ProductQuantityDC> productQuantities = new List<ProductQuantityDC>();
                         foreach (var orddtl in orderdetailresult)
                         {
@@ -215,6 +222,7 @@ namespace ServiceLayer.Payment
 
                                 _unitOfWork.Commit();
                                 finalresult = true;
+                               
                             }
                         }
                        

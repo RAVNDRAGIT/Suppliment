@@ -26,17 +26,19 @@ namespace ServiceLayer.Order
         private long? userid;
         public JwtMiddleware _jwtMiddleware;
         public MongoHelper _mongoHelper;
-    
-        public OrderService(IUnitOfWork unitOfWork,   JwtMiddleware jwtMiddleware,MongoHelper mongoHelper)
+        private readonly WhatsAppHelper _whatsAppHelper;
+        public OrderService(IUnitOfWork unitOfWork,   JwtMiddleware jwtMiddleware,MongoHelper mongoHelper, WhatsAppHelper whatsAppHelper)
         {
            
             _unitOfWork = unitOfWork;
             _mongoHelper = mongoHelper;
             
             _jwtMiddleware = jwtMiddleware;
-           
-      
-           
+            _whatsAppHelper = whatsAppHelper;
+
+
+
+
         }
         public async Task<long> SubmitOrder(CheckOutOrderDC checkOutOrderDC)
         {
@@ -51,7 +53,7 @@ namespace ServiceLayer.Order
                 var orderMaster = Mapper.Map(cart).ToANew<OrderMaster>();
                 orderMaster.UserLocationId = checkOutOrderDC.UserLocationId;
                 orderMaster.PaymentType = checkOutOrderDC.PaymentType;
-
+                orderMaster.PaymentRequestOrderId = checkOutOrderDC.MongoId;
                 orderid = await _unitOfWork.OrderMasterRepository.SaveOrder(orderMaster, currentuserid);
                 
                 if (orderid > 0)
@@ -102,6 +104,36 @@ namespace ServiceLayer.Order
                 }
             }
             return orderid;
+        }
+
+        public async Task<bool> UpdateWhatsAppStatus(string resorderid)
+        {
+            long currentuserid = _jwtMiddleware.GetUserId() ?? 0;
+            var orderesponse = await _mongoHelper.OrderResponseCollection().Find(x => x.order_id == resorderid).FirstOrDefaultAsync();
+
+            if (orderesponse != null)
+            {
+
+
+                bool res = await _whatsAppHelper.SendMessgae(orderesponse.DbOrderId);
+
+                var data = await _unitOfWork.OrderMasterRepository.UpdateSentSms(orderesponse.DbOrderId, res, currentuserid);
+                if (data)
+                {
+                    _unitOfWork.Commit();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+            
+           
         }
     }
 }

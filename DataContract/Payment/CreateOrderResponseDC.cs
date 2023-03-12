@@ -39,6 +39,7 @@ namespace DataContract.Payment
         public DateTime Updated_Date { get; set; }
         public bool IsActive { get; set; }
         public bool IsDelete { get; set; }
+        public long DbOrderId { get; set; }
     }
    
 

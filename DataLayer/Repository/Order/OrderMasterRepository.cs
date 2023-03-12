@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Order;
+using BusinessLayer.Users;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using DataContract.Product;
@@ -86,6 +87,20 @@ namespace DataLayer.Repository.Order
             if(data!=null)
             {
                 data.IsPaid = ispaid;
+                data.Updated_Date = DateTime.Now;
+                data.Updated_By = userid;
+            }
+
+            bool result = await _sqlConnection.UpdateAsync<OrderMaster>(data, _transaction);
+            return result;
+        }
+
+        public async Task<bool> UpdateSentSms(long orderid,bool issentsms,long userid)
+        {
+            var data = await _sqlConnection.GetAsync<OrderMaster>(orderid, _transaction);
+            if (data != null)
+            {
+                data.IsMsgSent = issentsms;
                 data.Updated_Date = DateTime.Now;
                 data.Updated_By = userid;
             }

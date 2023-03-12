@@ -15,5 +15,6 @@ namespace DataLayer.Interface
         Task<OrderMaster> GetOrder(long orderid);
         Task<bool> UpdateOrderPayment(long orderid,bool ispaid,long userid);
         Task<long> UpdateDeliveryToken(long orderid, long userid, string token);
+        Task<bool> UpdateSentSms(long orderid, bool issentsms, long userid);
     }
 }

@@ -118,6 +118,7 @@ namespace ServiceLayer.Carts
                     cartDetails.Created_Date = DateTime.Now;
                     cartDetails.Updated_Date = DateTime.Now;
                     cartDetails.Quantity = cartDetailDC.Quantity;
+                    cartDetails.ImagePath = data.ImagePath;
                     listcartDetails.Add(cartDetails);
 
 
@@ -212,7 +213,7 @@ namespace ServiceLayer.Carts
                     foreach (var cartitem in existingcartuser.cartDetails)
                     {
                         // var data = await _productMasterRepository.GetProduct(cartitem.ProductId);
-                        var data = await _unitofWork.ProductMasterRepository.GetProduct(cartitem.ProductId);
+                        var data = await _unitofWork.ProductMasterRepository.GetProductForCart(cartitem.ProductId);
                         if (data != null)
                         {
                             CartDetails cartDetails = Mapper.Map(data).ToANew<CartDetails>();
@@ -238,6 +239,7 @@ namespace ServiceLayer.Carts
                             cartDetails.Created_Date = DateTime.Now;
                             cartDetails.Updated_Date = DateTime.Now;
                             cartDetails.Quantity = cartitem.Quantity;
+                            cartDetails.ImagePath = data.ImagePath;
                             listcartDetails.Add(cartDetails);
 
                         }

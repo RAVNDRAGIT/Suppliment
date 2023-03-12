@@ -16,9 +16,9 @@ namespace Suppliment.API.Controllers.Payment
         }
 
         [HttpGet]
-        public async Task<IActionResult> UpdatePaymentStatus(long orderid)
+        public async Task<IActionResult> UpdatePaymentStatus(string resorderid)
         {
-            var res= await _paymentService.AfterPayment(orderid);
+            var res= await _paymentService.AfterPayment(resorderid);
             return Ok(res);
 
         }
